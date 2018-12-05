@@ -51,7 +51,7 @@ Following you will see an example of a Node which sends out the current minute
 and second every five seconds.
 
 ```python
-""Example for a Node that sends out messages"""
+""""Example for a Node that sends out messages"""
 # System imports
 from threading import Thread
 import datetime
