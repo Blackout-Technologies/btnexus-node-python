@@ -37,14 +37,36 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 `Topics` and `Groups` help to organize `Messages`. A `Callback` can only be mapped to one `Group` and  `Topic`.
 
 
-
-
-
-
 # Prerequisites
 
 * Python installed
 * Owner of a btNexus instance or a btNexus account
+
+# Install btnexus-node-python
+## easiest solution
+
+Right now you need to clone/download the repository and install it from the folder.
+We are planing to upload the `btnexus-node-python` to PyPi.
+We recommend using Anaconda (https://www.anaconda.com/), because you wont need `sudo` and you can simply use virtual environments.
+If you are using Anaconda or any other virtual environments and pip(**recommended**) you can simply
+```
+pip install btnexus-node-python/
+```
+
+## workaround
+If you cannot use pip for any reason, do the following:
+
+Install the Python modules with
+```
+sudo easy_install .
+```
+
+If you are not `sudo` use the install.sh to install the modules to your home directory
+```
+./install.sh
+```
+
+If you can not use pip you also have to install six and pyyaml manually.
 
 # Example Nodes
 Following you will see an example of a Node which sends out the current minute
@@ -106,25 +128,9 @@ if( __name__ == "__main__" ):
 The ListeningNode and all further examples can be seen in the examples folder.
 
 
-
-# Install btnexus-node-python
-## easiest solution
-If you are using virtual environments and pip(**recommended**) you can simply
-```
-pip install btnexus-node-python
-```
-
-## workaround
-If you cannot use pip for any reason, do the following:
-
-Install the Python modules with
-```
-sudo easy_install .
-```
-
-If you are not `sudo` use the install.sh to install the modules to your home directory
-```
-./install.sh
-```
-
-If you can not use pip you also have to install six and pyyaml manually.
+# Implement your own Node
+First you need know the purpose of your Node.
+Nodes should be small and serve only one purpose.
+To implement your own Node you need to inherit from the Node class,
+implement your callbacks and if you are actively doing something implement your
+Threads, that for example read in sensor data. See the examples to get started ;)
