@@ -41,6 +41,7 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 
 * Python installed
 * Owner of a btNexus instance or a btNexus account
+* Set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG`
 
 # Install btnexus-node-python
 ## easiest solution
@@ -134,3 +135,4 @@ Nodes should be small and serve only one purpose.
 To implement your own Node you need to inherit from the Node class,
 implement your callbacks and if you are actively doing something implement your
 Threads, that for example read in sensor data. See the examples to get started ;)
+Keep in mind, that you need to set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG`. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).
