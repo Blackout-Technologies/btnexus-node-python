@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#right now the doc folder is crappy and will not be used
+doc/
