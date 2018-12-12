@@ -46,26 +46,11 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 
 # Install btnexus-node-python
 ## easiest solution
-
-You can install the btnexus-node really easy with pip directly from GitHub
-
+With pip you can install the repository directly.
+We recommend using Anaconda (https://www.anaconda.com/), because you wont need `sudo` and you can simply use virtual environments.
+If you are using Anaconda or any other virtual environments(**recommended**) or your systems pip(**not recommended**) you can simply
 ```
 pip install git+https://github.com/Blackout-Technologies/btnexus-node-python
-```
-
-or
-
-```
-pip3 install git+https://github.com/Blackout-Technologies/btnexus-node-python
-```
-
-## Anaconda alternative
-With anaconda you need to clone/download the repository and install it from the folder.
-We are planing to upload the `btnexus-node-python` to PyPi some time later in the project.
-We recommend using Anaconda (https://www.anaconda.com/), because you wont need `sudo` and you can simply use virtual environments.
-If you are using Anaconda or any other virtual environments and pip(**recommended**) you can simply
-```
-pip install btnexus-node-python/
 ```
 
 ## workaround
