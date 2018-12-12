@@ -5,11 +5,12 @@
 |||
 |---|---|
 |Author|Adrian Lubitz|
+|Author|Marc Fiedler|
 |Email|dev@blackout.ai|
 |Latest stable version|3.0.0|
 |Required Axon versions| >= 3.0.0|
+|Runs on|Python 2.7+ & Python 3+|
 |State|`Stable`|
-
 
 # Introduction
 
@@ -39,15 +40,28 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 
 # Prerequisites
 
-* Python installed
+* Python installed (either 2.7+ or Python 3)
 * Owner of a btNexus instance or a btNexus account
 * Set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG`
 
 # Install btnexus-node-python
 ## easiest solution
 
-Right now you need to clone/download the repository and install it from the folder.
-We are planing to upload the `btnexus-node-python` to PyPi.
+You can install the btnexus-node really easy with pip directly from GitHub
+
+```
+pip install git+https://github.com/Blackout-Technologies/btnexus-node-python
+```
+
+or
+
+```
+pip3 install git+https://github.com/Blackout-Technologies/btnexus-node-python
+```
+
+## Anaconda alternative
+With anaconda you need to clone/download the repository and install it from the folder.
+We are planing to upload the `btnexus-node-python` to PyPi some time later in the project.
 We recommend using Anaconda (https://www.anaconda.com/), because you wont need `sudo` and you can simply use virtual environments.
 If you are using Anaconda or any other virtual environments and pip(**recommended**) you can simply
 ```
