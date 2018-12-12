@@ -5,7 +5,8 @@ setup(name='btnexus-node-python',
       py_modules=['btNode'],
       install_requires=[
           'pyyaml',
-          'six'
+          'six',
+          'certifi'
       ],
       )
 ####TODO: add requirements and bring it to the newest style to install via PyPi, is find_packages the best option?
