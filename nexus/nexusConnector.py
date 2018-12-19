@@ -131,12 +131,10 @@ class NexusConnector():
 
         reply = Message("publish")
         reply["payload"] = {callbackName + "_response":{"orignCall":callbackName ,"originParams":params, "returnValue": retVal}}
-        reply["topic"] = topic
+        reply["topic"] = "ai.blackout." + topic
         reply["group"] = group
         reply["host"] = socket.gethostname()
         self.publish(reply)
-        print("Hier bin ich und sendete: {}".format(reply))
-
 
     def setDebugMode(self, mode):
         """
