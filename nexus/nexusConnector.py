@@ -11,11 +11,11 @@ import logging
 from collections import defaultdict
 import ssl
 import certifi
+from threading import Thread
 
 
 
 # 3rd party imports
-# from naoqi import ALProxy
 
 # local imports
 from .btWebsocket import *
@@ -97,12 +97,8 @@ class NexusConnector():
             params = msg["payload"][callbackName]
             group = msg["group"]
             if callbackName in self.callbacks[group][topic].keys():
-                if type(params) == list:
-                    return self.callbacks[group][topic][callbackName](*params)
-                elif type(params) == dict:
-                    return self.callbacks[group][topic][callbackName](**params)
-                else:
-                    self.publishError("Parameters can either be given as a list or a keywordDict.")
+                # Thread(target=self.executeCallback, args=(group, topic, callbackName, params)).start()
+                self.executeCallback(group, topic, callbackName, params)
             else:
                 error = NoCallbackFoundException("Callback {} doesn't exist in node {} on topic {} in group {}".format(callbackName, self.parent.__class__.__name__, topic, group))
                 self.publishDebug(str(error))
@@ -111,6 +107,36 @@ class NexusConnector():
             error = NoCallbackFoundException(str(e))
             self.publishError(str(error))
             return error
+
+    def executeCallback(self, group, topic, callbackName, params):
+        """
+        This executes the given callback with the given params and send the response
+
+        :param group: Name of the group
+        :type group: String
+        :param topic: Name of the topic
+        :type topic: String
+        :param callbackName: Name of the callback
+        :type callbackName: String
+        :param params: the params for the callback either as list or keywordDict
+        :type params: list or keywordDict
+        """
+        if type(params) == list:
+            retVal = self.callbacks[group][topic][callbackName](*params)
+        elif type(params) == dict:
+            retVal = self.callbacks[group][topic][callbackName](**params)
+        else:
+            self.publishError("Parameters can either be given as a list or a keywordDict.")
+            return
+
+        reply = Message("publish")
+        reply["payload"] = {callbackName + "_response":{"orignCall":callbackName ,"originParams":params, "returnValue": retVal}}
+        reply["topic"] = topic
+        reply["group"] = group
+        reply["host"] = socket.gethostname()
+        self.publish(reply)
+        print("Hier bin ich und sendete: {}".format(reply))
+
 
     def setDebugMode(self, mode):
         """
@@ -290,16 +316,7 @@ class NexusConnector():
             if( self.isRegistered ):
                 try:
                     # Call topic callback with this message
-                    callbackName = list(msg["payload"].keys())[0]
-                    params = msg["payload"][callbackName]
-                    retVal = self.callbackManager(msg)
-                    if type(retVal) is not NoCallbackFoundException:
-                        reply = Message("publish")
-                        reply["payload"] = {callbackName + "_response":{"orignCall":callbackName ,"originParams":params, "returnValue": retVal}}
-                        reply["topic"] = msg["topic"]
-                        reply["group"] = msg["group"]
-                        reply["host"] = socket.gethostname()
-                        self.publish(reply)
+                    self.callbackManager(msg)
                 except Exception:
                     self.publishError(traceback.format_exc())
 
