@@ -97,8 +97,8 @@ class NexusConnector():
             params = msg["payload"][callbackName]
             group = msg["group"]
             if callbackName in self.callbacks[group][topic].keys():
-                # Thread(target=self.executeCallback, args=(group, topic, callbackName, params)).start()
-                self.executeCallback(group, topic, callbackName, params)
+                Thread(target=self.executeCallback, args=(group, topic, callbackName, params)).start()
+                # self.executeCallback(group, topic, callbackName, params)
             else:
                 error = NoCallbackFoundException("Callback {} doesn't exist in node {} on topic {} in group {}".format(callbackName, self.parent.__class__.__name__, topic, group))
                 self.publishDebug(str(error))
