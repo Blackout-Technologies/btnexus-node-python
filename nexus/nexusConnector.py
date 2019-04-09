@@ -13,8 +13,6 @@ import ssl
 import certifi
 from threading import Thread
 
-
-
 # 3rd party imports
 
 # local imports
@@ -55,7 +53,6 @@ class NexusConnector():
         self.token = os.environ["TOKEN"]
         self.axon = os.environ["AXON_HOST"]
         self.debug = "NEXUS_DEBUG" in os.environ
-
 
         self.wsConf = self.protocol + "://"+ str(self.axon)
 
@@ -158,8 +155,11 @@ class NexusConnector():
         #self.ws.on_open = self.onOpen
 
         #self.setDebugMode(self.parent.debug)
-        #self.ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
-        self.ws.run_forever()
+        sslopt = None
+        if( "DISABLE_SSL_VERIFY" in os.environ ):
+            sslopt = {"cert_reqs": ssl.CERT_NONE}
+
+        self.ws.run_forever(sslopt=sslopt)
 
     def join(self, group):
         """
