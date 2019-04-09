@@ -6,7 +6,8 @@ setup(name='btnexus-node-python',
       install_requires=[
           'pyyaml',
           'six',
-          'certifi'
+          'certifi',
+          'backports.ssl_match_hostname'
       ],
       )
 ####TODO: add requirements and bring it to the newest style to install via PyPi, is find_packages the best option?
