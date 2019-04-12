@@ -12,6 +12,9 @@
 |Runs on|Python 2.7+ & Python 3+|
 |State|`Stable`|
 
+# Known Issues
+Since Version 3.1 Node automatically reconnect on an Error. That means any occurring error causes a reconnect. **KeyboardInterupt is an Error. If you want to terminate your script use `ctrl + Alt Gr + \`**
+
 # Introduction
 
 The `nexus` by Blackout Technologies is a platform to create Digital Assistants and to connect them via the internet to multiple platforms. Those platforms can be websites, apps or even robots. The `nexus` consists of two major parts, first being the `btNexus` and second the nexusUi. The `btNexus` is the network that connects the A.I. with the nexusUi and the chosen interfaces. The nexusUi is the user interface, that allows the user to create their own A.I.-based Digital Assistant. Those Digital Assistants can be anything, support chatbots or even robot personalities.   
@@ -42,7 +45,6 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 
 * Python installed (either 2.7+ or Python 3)
 * Owner of a btNexus instance or a btNexus account
-* Set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG`
 
 # Install btnexus-node-python
 ## easiest solution
@@ -73,12 +75,12 @@ Following you will see an example of a Node which sends out the current minute
 and second every five seconds.
 
 ```python
-""""Example for a Node that sends out messages"""
+"""Example for a Node that sends out messages"""
 # System imports
 from threading import Thread
 import datetime
 import time
-
+import os
 # 3rd party imports
 from btNode import Node
 
@@ -88,11 +90,14 @@ class SendingNode(Node):
     """
     This Node shows how to implement an active Node which sends different Messages
     """
-    def nodeConnected(self):
+    def onConnected(self):
         """
         This will be executed after a the Node is succesfully connected to the btNexus
         Here you need to subscribe and set everything else up.
+
+        :returns: None
         """
+        self.shouldRun = True
         self.subscribe(group="exampleGroup",topic="example", callback=self.fuseTime_response) # Here we subscribe to the response of messages we send out to fuseTime
         self.thread = Thread(target=self.mainLoop)
         self.thread.start() # You want to leave this method so better start everything which is actively doing something in a thread.
@@ -107,23 +112,43 @@ class SendingNode(Node):
         :type originParams: List or keywordDict
         :param returnValue: The returned Value from the orignCall
         :type returnValue: any
+        :returns: None
         """
         print("[{}]: {}".format(self.__class__.__name__, returnValue))
 
     def mainLoop(self):
         """
         Sending currenct minute and second to the ListeningNode on the printMsg and fuse callback.
+
+        :returns: Never
         """
-        while(True):
+        #Make sure the thread terminates, when reconnecting
+        #otherwise onConnected will spawn another
+        #and you will end up with n threads, where n is the number of connects
+        while(self.shouldRun):
             now = datetime.datetime.now()
             self.publish(group="exampleGroup", topic="example", funcName="printTime", params=[now.minute, now.second])
             self.publish(group="exampleGroup", topic="example", funcName="fuseTime", params={"min":now.minute, "sec":now.second})
             time.sleep(5)
 
+    def cleanUp(self):
+        """
+        Make sure the thread terminates, when reconnecting
+        otherwise onConnected will spawn another
+        and you will end up with n threads, where n is the number of connects
+        """
+        super(SendingNode, self).cleanUp()
+        self.shouldRun = False
+        self.thread.join()
+
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    sendingNode = SendingNode()
-    sendingNode.run() # This call is blocking
+    token = os.environ["TOKEN"]
+    axon = os.environ["AXON_HOST"]
+    debug = "NEXUS_DEBUG" in os.environ
+    sendingNode = SendingNode(token, axon, debug)
+    sendingNode.connect() # This call is blocking
+
 ```
 The ListeningNode and all further examples can be seen in the examples folder.
 
@@ -134,4 +159,4 @@ Nodes should be small and serve only one purpose.
 To implement your own Node you need to inherit from the Node class,
 implement your callbacks and if you are actively doing something implement your
 Threads, that for example read in sensor data. See the examples to get started ;)
-Keep in mind, that you need to set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG`. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).
+Keep in mind, that you need to set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG` for the examples. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).

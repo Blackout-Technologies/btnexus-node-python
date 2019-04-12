@@ -22,15 +22,22 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 class Node(object):
     """Blackout Nexus node"""
 
-    def __init__(self):
+    def __init__(self, token,  axonURL,  debug):
         """
         Constructor sets up the NexusConnector.
-        The following environment variables need to be set:
-        TOKEN: is the AccessToken for the btNexus
-        AXON_HOST: is the url to the axon to use
-        NEXUS_DEBUG: if set(to anything) the debug option is on
+
+        :param token: AccessToken for the btNexus
+        :type token: String
+        :param axonURL: URL for the Axon(InstanceURL)
+        :type axonURL: String
+        :param debug: switch for debug messages
+        :type debug: bool
         """
-        self.nexusConnector = NexusConnector(self.nodeConnected, parent = self)
+        self.nodeName = self.__class__.__name__
+        if not axonURL.endswith("/"):
+            axonURL += "/"
+        axonURL += self.nodeName
+        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL, debug)
 
 
     def linkModule(self, module,group, topic):
@@ -139,19 +146,48 @@ class Node(object):
         """
         self.publishError(error)
 
+    def onError(self, error):
+        """
+        Handling of Errors. If not overloaded it just forwards the error to the nexusConnector which just prints and publishes it if possible
+        """
+        self.nexusConnector.onError(None, "[{}] Error: {}".format(self.nodeName, error))
 
-    def nodeConnected(self):
+    def onConnected(self):
         """
         Is called when this node was connected
         This needs to be overloaded to subscribe to messages.
         """
         pass
 
+    def onDisconnected(self):
+        """
+        This will be executed after a the Node is disconnected from the btNexus
+        If not implemented the Node tries to reconnect
+        """
+        pass #TODO: use setup and cleanup here
+        self.cleanUp()
+        self.setUp()
+        self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
+        time.sleep(1)
+        self.nexusConnector.listen()
+
+    def setUp(self):
+        """
+        Implement this to handle the things, which should be done before the connection to nexus is established.
+        """
+        print("[{}]: setUp".format(self.nodeName))
+
+    def cleanUp(self):
+        """
+        Implement this to handle the things, which should be when you disconnect the node.
+        """
+        print("[{}]: cleanUp".format(self.nodeName))
 
 
-    def run(self):
+    def connect(self):
         """
         Runs this node and listen forever
         This is a blocking call
         """
+        self.setUp()
         self.nexusConnector.listen()

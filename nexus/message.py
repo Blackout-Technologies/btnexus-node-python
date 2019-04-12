@@ -40,7 +40,7 @@ class Message():
         """
         # Load existing message
         self.data = jsonData
-        self.validate()
+        #self.validate() #TODO: commented out for the moment
         self.valid = True
 
     def loadFromJsonString(self, jsonData):
@@ -49,7 +49,7 @@ class Message():
         """
         # Load existing message
         self.data = yaml.safe_load(jsonData)
-        self.validate()
+        # self.validate() #TODO: commented out for the moment
         self.valid = True
 
 
