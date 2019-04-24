@@ -382,7 +382,7 @@ class NexusConnector():
         msg = Message("register")
         msg["token"] = self.token #TODO: is this the access token? for older version use interface
         msg["host"] = socket.gethostname()
-        msg["ip"] = socket.gethostbyname(socket.gethostname()) # "127.0.0.1" #socket.gethostbyname(socket.gethostname())
+        msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
         msg["id"] = self.nodeId
         msg["node"] = {}    #TODO: What should be in this field?
         self.ws.send(msg.getJsonContent())
