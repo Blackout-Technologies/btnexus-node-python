@@ -56,6 +56,12 @@ pip install git+https://github.com/Blackout-Technologies/btnexus-node-python
 ```
 
 ## workaround
+If you don't use an environment and cannot use the system pip(no sudo) just add the `--user` option:
+
+```
+pip install --user git+https://github.com/Blackout-Technologies/btnexus-node-python
+```
+
 If you cannot use pip for any reason, do the following:
 
 Install the Python modules with
@@ -63,7 +69,7 @@ Install the Python modules with
 sudo easy_install .
 ```
 
-If you are not `sudo` use the install.sh to install the modules to your home directory
+If you are not `sudo` and have no pip use the install.sh to install the modules to your home directory
 ```
 ./install.sh
 ```

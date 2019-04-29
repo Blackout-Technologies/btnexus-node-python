@@ -162,7 +162,9 @@ class Node(object):
         Is called when this node was connected
         This needs to be overloaded to subscribe to messages.
         """
-        pass
+        if self.debug:
+            print("You are using deprecated method nodeConnected(). You should use onConnected()")
+        self.nodeConnected()
 
     def onDisconnected(self):
         """
@@ -203,11 +205,3 @@ class Node(object):
         if self.debug:
             print("You are using deprecated method run(). You should use connect()")
         self.connect()
-
-    def nodeConnected(self):
-        """
-        DEPRECATED: Will be replaced with onConnected(). Is here for backwards compatibility.
-        """
-        if self.debug:
-            print("You are using deprecated method nodeConnected(). You should use onConnected()")
-        self.onConnected()
