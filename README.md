@@ -54,6 +54,7 @@ If you are using Anaconda or any other virtual environments(**recommended**) or 
 ```
 pip install git+https://github.com/Blackout-Technologies/btnexus-node-python
 ```
+*to install a specific version add @version*
 
 ## workaround
 If you don't use an environment and cannot use the system pip(no sudo) just add the `--user` option:
