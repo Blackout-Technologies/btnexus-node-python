@@ -7,6 +7,7 @@ import socket
 import sys
 from collections import defaultdict
 import inspect
+import os
 
 # 3rd Party imports
 
@@ -22,7 +23,7 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 class Node(object):
     """Blackout Nexus node"""
 
-    def __init__(self, token,  axonURL,  debug):
+    def __init__(self, token=None,  axonURL=None,  debug=None):
         """
         Constructor sets up the NexusConnector.
 
@@ -33,12 +34,18 @@ class Node(object):
         :param debug: switch for debug messages
         :type debug: bool
         """
+        if token == None:
+            token = os.environ["TOKEN"]
+        if axonURL == None:
+            axonURL = os.environ["AXON_HOST"]
+        if debug == None:
+            self.debug = "NEXUS_DEBUG" in os.environ
+
         self.nodeName = self.__class__.__name__
         if not axonURL.endswith("/"):
             axonURL += "/"
         axonURL += self.nodeName
-        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL, debug)
-
+        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL, self.debug)
 
     def linkModule(self, module,group, topic):
         """
@@ -104,8 +111,6 @@ class Node(object):
         info["host"] = socket.gethostname()
         info["group"] = group
         self.nexusConnector.publish(info)
-
-
 
     def publishDebug(self, debug):
         """
@@ -183,7 +188,6 @@ class Node(object):
         """
         print("[{}]: cleanUp".format(self.nodeName))
 
-
     def connect(self):
         """
         Runs this node and listen forever
@@ -191,3 +195,19 @@ class Node(object):
         """
         self.setUp()
         self.nexusConnector.listen()
+
+    def run(self):
+        """
+        DEPRECATED: Will be replaced with connect(). Is here for backwards compatibility.
+        """
+        if self.debug:
+            print("You are using deprecated method run(). You should use connect()")
+        self.connect()
+
+    def nodeConnected(self):
+        """
+        DEPRECATED: Will be replaced with onConnected(). Is here for backwards compatibility.
+        """
+        if self.debug:
+            print("You are using deprecated method nodeConnected(). You should use onConnected()")
+        self.onConnected()
