@@ -171,7 +171,6 @@ class Node(object):
         This will be executed after a the Node is disconnected from the btNexus
         If not implemented the Node tries to reconnect
         """
-        pass #TODO: use setup and cleanup here
         self.cleanUp()
         self.setUp()
         self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
