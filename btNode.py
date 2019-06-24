@@ -40,6 +40,8 @@ class Node(object):
             axonURL = os.environ["AXON_HOST"]
         if debug == None:
             self.debug = "NEXUS_DEBUG" in os.environ
+        else:
+            self.debug = debug
 
         self.nodeName = self.__class__.__name__
         if not axonURL.endswith("/"):
