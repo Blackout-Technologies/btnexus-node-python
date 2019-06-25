@@ -18,13 +18,14 @@ class Hook(Node):
     """
     Blackout Nexus hook. Base class for all hooks
     """
-    def __init__(self, connectHash = None):
+    def __init__(self, connectHash = None, **kwargs):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
         (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc)
         """
         #get connectHash
+        self.initKwargs = kwargs
         if connectHash == None:
             if "CONNECT_HASH" in os.environ:
                 connectHash = os.environ["CONNECT_HASH"]
@@ -56,7 +57,7 @@ class Hook(Node):
         self.subscribe(self.config["id"], "state", self.state)
         self.readyState = "ready"
         self.state()
-        self.onReady()
+        self.onReady(**self.initKwargs)
 
 
 
@@ -117,11 +118,12 @@ class Hook(Node):
 
 
 
-    def onReady(self):
+    def onReady(self, **kwargs):
         """
-        Initilize what you need after the hook connected
+        Initilize what you need after the hook connected - you can pass kwargs in the constructor to use them here
         """
-        pass
+        print("Ready with params: {}".format(kwargs))
+        
 
 if __name__ == "__main__":
-    h = Hook()
+    h = Hook(test="TestParam")
