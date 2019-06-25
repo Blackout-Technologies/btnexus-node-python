@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 setup(name='btnexus-node-python',
-      version='3.1.1',
+      version='3.2.0',
       packages = find_packages(),
-      py_modules=['btNode'],
+      py_modules=['btNode', 'btHook'],
       install_requires=[
           'pyyaml',
           'six',
