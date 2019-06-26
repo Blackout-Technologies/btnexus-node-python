@@ -187,7 +187,7 @@ class Node(object):
 
     def cleanUp(self):
         """
-        Implement this to handle the things, which should be when you disconnect the node.
+        Implement this to handle the things, which should be done when you disconnect the node.
         """
         print("[{}]: cleanUp".format(self.nodeName))
 

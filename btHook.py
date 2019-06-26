@@ -13,6 +13,13 @@ else:
 from btNode import Node # have it like this so it will still be possible to seperate it into its own package
 
 # local imports
+from nexus.btNexusMemory import BTNexusMemory
+
+# end file header
+__author__      = "Adrian Lubitz"
+__copyright__   = "Copyright (c)2017, Blackout Technologies"
+__version__     = "0.6.3"
+
 
 class Hook(Node):
     """
@@ -22,7 +29,7 @@ class Hook(Node):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
-        (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc)
+        (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(priritized in this order))
         """
         #get connectHash
         self.initKwargs = kwargs
@@ -37,11 +44,12 @@ class Hook(Node):
         self.config = json.loads(base64.b64decode(connectHash))
 
         #call super constructor with axon and token set
-        token = self.config["token"]
-        host = urlsplit(self.config["host"]).netloc
-        if not host:
-            host = self.config["host"] # backwardscompatibility
-        super(Hook, self).__init__(token, host)
+        self.token = self.config["token"]
+        self.host = urlsplit(self.config["host"]).netloc
+        if not self.host:
+            self.host = self.config["host"] # backwardscompatibility
+        super(Hook, self).__init__(self.token, self.host)
+        self.onInit(**kwargs)
         self.connect()
 
 
@@ -49,11 +57,11 @@ class Hook(Node):
         """
         Setup all Callbacks
         """
-
+        
+        self.memory.addEvent(self.memoryData)
         # Join complete
         self.subscribe(self.config["id"], 'hookChat', self._onMessage, "onMessage") 
 
-        #TODO: why?
         self.subscribe(self.config["id"], "state", self.state)
         self.readyState = "ready"
         self.state()
@@ -122,7 +130,28 @@ class Hook(Node):
         """
         Initilize what you need after the hook connected - you can pass kwargs in the constructor to use them here
         """
-        print("Ready with params: {}".format(kwargs))
+        if kwargs:
+            print("onReady with params: {}".format(kwargs))
+    
+    def onInit(self, **kwargs):
+        """
+        Initilize what you need after the hook connected - you can pass kwargs in the constructor to use them here
+        """
+        if kwargs:
+            print("onInit with params: {}".format(kwargs))
+
+
+    def setUp(self):
+        self.memoryData = {
+                'service': "hook",
+                'context': self.config['id'],
+                'version': __version__
+                }
+        self.memory = BTNexusMemory("https://" + self.host, self.token)
+
+    def cleanUp(self):
+        self.memory.removeEvent(self.memoryData)
+
         
 
 if __name__ == "__main__":
