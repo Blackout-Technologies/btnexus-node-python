@@ -34,8 +34,16 @@ class Hook(Node):
         (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(prioritized in this order))
         """
         configpath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+        captionsPath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'captions.json')
         with open(configpath) as jsonFile:
             self.version = json.load(jsonFile)["version"]
+
+        try:
+            with open(captionsPath) as jsonFile:
+                self.captions = json.load(jsonFile)
+        except:
+            print("Couldn't load captions")
+
         #get connectHash
         self.initKwargs = kwargs
         if connectHash == None:
