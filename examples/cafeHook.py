@@ -13,7 +13,7 @@ from geotext import GeoText # only works with the english names of the cities
 
 # local imports
 
-class TestHook(Hook):
+class CafeHook(Hook):
     """
     Example for a Hook that responds with a cafe for a city
     """
@@ -69,5 +69,5 @@ class TestHook(Hook):
         self.say(peer, message)
 
 if __name__ == "__main__":
-    h = TestHook()  # setup the .btnexusrc in your project
+    h = CafeHook()  # setup the .btnexusrc in your project
 
