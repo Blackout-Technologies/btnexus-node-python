@@ -16,7 +16,7 @@ class TestHook(Hook):
         """
         set up everything
         """
-        print("Hook is ready")
+        print("Hook is ready in version {}".format(self.version))
 
     def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
         """

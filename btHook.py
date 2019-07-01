@@ -4,6 +4,7 @@ import os
 import base64
 import json
 import sys
+import inspect
 if sys.version_info.major == 2:
     from urlparse import urlsplit
 else:
@@ -20,7 +21,6 @@ from nexus.btNexusData import BTNexusData
 # end file header
 __author__      = "Adrian Lubitz"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
-__version__     = "0.6.3"
 
 
 class Hook(Node):
@@ -33,6 +33,9 @@ class Hook(Node):
         extracting all important infos from the connectHash
         (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(prioritized in this order))
         """
+        configpath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+        with open(configpath) as jsonFile:
+            self.version = json.load(jsonFile)["version"]
         #get connectHash
         self.initKwargs = kwargs
         if connectHash == None:
@@ -159,7 +162,7 @@ class Hook(Node):
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
-                'version': __version__
+                'version': self.version  #TODO: this should be the version of the implementation not the lib
                 }
         
 
