@@ -26,10 +26,27 @@ class BTNexusData():
         self.hookId = hookId
 
     def save(self, key, value, callback=None):
-        pass #TODO: implement
+        data = {"hookId": self.hookId, "key": key, "value": value}
+        BTPostRequest("hookDataSave", data, self.token, self.url, callback).send()
+
 
     def load(self, key, callback=None):
-        pass #TODO: implement
+        data = {"hookId": self.hookId, "key": key}
+        BTPostRequest("hookDataLoad", data, self.token, self.url, callback).send()
     
     def put(self, key, value, callback=None):
-        pass #TODO: implement
+        """This for arrays of data"""
+        def _putCallback(response):
+            val = []
+            if "value" in response:
+                if "append" in dir(response["value"]):
+                    val = response["value"]
+                
+            val.append(value)
+            self.save(key, val, callback)
+        
+        self._putCallback = _putCallback
+        self.load(key, self._putCallback)
+
+
+    

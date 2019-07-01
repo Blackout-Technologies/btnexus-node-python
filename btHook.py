@@ -14,6 +14,8 @@ from btNode import Node # have it like this so it will still be possible to sepe
 
 # local imports
 from nexus.btNexusMemory import BTNexusMemory
+from nexus.btNexusData import BTNexusData
+
 
 # end file header
 __author__      = "Adrian Lubitz"
@@ -48,6 +50,9 @@ class Hook(Node):
         self.host = urlsplit(self.config["host"]).netloc
         if not self.host:
             self.host = self.config["host"] # backwardscompatibility
+
+        self.memory = BTNexusMemory("https://" + self.host, self.token)
+        self.data = BTNexusData("https://" + self.host, self.token, self.config['id'])
         super(Hook, self).__init__(self.token, self.host)
         self.onInit(**kwargs)
         self.connect()
@@ -65,6 +70,7 @@ class Hook(Node):
         self.subscribe(self.config["id"], "state", self.state)
         self.readyState = "ready"
         self.state()
+
         self.onReady(**self.initKwargs)
 
 
@@ -147,7 +153,7 @@ class Hook(Node):
                 'context': self.config['id'],
                 'version': __version__
                 }
-        self.memory = BTNexusMemory("https://" + self.host, self.token)
+        
 
     def cleanUp(self):
         self.memory.removeEvent(self.memoryData)
