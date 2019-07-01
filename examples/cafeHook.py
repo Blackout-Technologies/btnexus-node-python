@@ -65,7 +65,7 @@ class TestHook(Hook):
                     message = "Probier doch mal {} in {} {}. ".format(name, city, suburb)
                 else:
                     message += "Oder {} in {} {}. ".format(name, city, suburb)
-        except Exception as e:
+        except Exception:
             message = "Ich kann leider nichts passendes finden :/"
         
         self.say(peer, message)
