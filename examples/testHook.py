@@ -14,13 +14,13 @@ class TestHook(Hook):
     """
     def onReady(self, **kwargs):
         """
-        set up the API
+        set up everything
         """
         print("Hook is ready")
 
     def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
         """
-        respond
+        respond with predefined text
         """
         message = "Hello world from my TestHook"
         self.say(peer, message)

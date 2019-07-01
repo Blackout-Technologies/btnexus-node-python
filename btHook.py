@@ -31,7 +31,7 @@ class Hook(Node):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
-        (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(priritized in this order))
+        (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(prioritized in this order))
         """
         #get connectHash
         self.initKwargs = kwargs
@@ -76,6 +76,9 @@ class Hook(Node):
 
 
     def state(self):
+        """
+        publish the state of the hook
+        """
         self.publish(self.config["id"], self.config["id"], 'state', {
             'hookId': self.config["id"],
             'state': self.readyState
@@ -83,7 +86,8 @@ class Hook(Node):
 
     def _onMessage(self, **kwargs):
         """
-        Forwards the correct params to onMessage
+        Forwards the correct params to onMessage.
+        This method is just for internal use.
         """
 
         self.onMessage(originalTxt=kwargs["text"]["original"], 
@@ -117,15 +121,16 @@ class Hook(Node):
         :type peer: dict
         
         """
-        pass
-        self.say(peer, "Hook needs to overload onMessage")
+        self.say(peer, "Hook needs to overload onMessage")  # if not overloaded this is what your hook will say
 
     def say(self, peer, message):
         """
         publishes the hooks response.
 
-        :param originalTxt: the original text
-        :type originalTxt: String
+        :param message: the message text
+        :type message: String
+        :param peer: the peer object handed from onMessage
+        :type peer: Object
         """
         peer["message"] = {'answer':message}
         self.publish(peer["personalityId"], 'chat', 'hookResponse', peer)
@@ -141,13 +146,16 @@ class Hook(Node):
     
     def onInit(self, **kwargs):
         """
-        Initilize what you need after the hook connected - you can pass kwargs in the constructor to use them here
+        Initilize what you need before the hook connected - you can pass kwargs in the constructor to use them here
         """
         if kwargs:
             print("onInit with params: {}".format(kwargs))
 
 
     def setUp(self):
+        """
+        Register the hook in the system
+        """
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
@@ -156,10 +164,50 @@ class Hook(Node):
         
 
     def cleanUp(self):
+        """
+        Unregister the hook and send exit state
+        """
         self.memory.removeEvent(self.memoryData)
         self.readyState = 'exit'
         self.state()
 
+    def save(self, key, value, callback=None):
+        """
+        save a value to a specific key in the NexusData Api
+
+        :param key: the key to which the value should be saved
+        :type key: String
+        :param value: the object which should be saved
+        :type value: Object
+        :param callback: callback to handle the api response
+        :type callback: function pointer
+        """
+        self.data.save(key, value, callback)
+
+    def load(self, key, callback=None):
+        """
+        load a value to a specific key in the NexusData Api
+
+        :param key: the key to which the value should be saved
+        :type key: String
+        :param callback: callback to handle the api response
+        :type callback: function pointer
+        """
+        self.data.load(key, callback)
+        
+    def put(self, key, value, callback=None):
+        """
+        add a value to a specific key in the NexusData Api - the value must be a list otherwise it will be overwritten
+
+        :param key: the key to which the value should be saved
+        :type key: String
+        :param value: the object which should be saved
+        :type value: Object
+        :param callback: callback to handle the api response
+        :type callback: function pointer
+        """
+
+        self.data.put(key, value, callback)
         
 
 if __name__ == "__main__":

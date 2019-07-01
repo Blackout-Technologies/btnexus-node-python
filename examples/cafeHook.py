@@ -18,11 +18,9 @@ class TestHook(Hook):
     Example for a Hook that responds with a cafe for a city
     """
 
-
-
     def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
         """
-        respond with a restaurant name
+        respond with a cafe name for a city
         """
         cities = []
         text = ""
