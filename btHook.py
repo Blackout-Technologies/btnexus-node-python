@@ -157,6 +157,8 @@ class Hook(Node):
 
     def cleanUp(self):
         self.memory.removeEvent(self.memoryData)
+        self.readyState = 'exit'
+        self.state()
 
         
 

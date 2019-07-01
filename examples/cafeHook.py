@@ -7,7 +7,7 @@ Example for a Hook that responds with a cafe for a city
 from btHook import Hook
 import requests
 import random
-from geotext import GeoText
+from geotext import GeoText # only works with the english names of the cities
 
 
 
