@@ -138,12 +138,12 @@ class Hook(Node):
         """
         publishes the hooks response.
 
-        :param message: the message text
-        :type message: String
+        :param message: the message dict with at least the field 'answer'
+        :type message: dict
         :param peer: the peer object handed from onMessage
         :type peer: Object
         """
-        peer["message"] = {'answer':message}
+        peer["message"] = message
         self.publish(peer["personalityId"], 'chat', 'hookResponse', peer)
 
 

@@ -66,7 +66,7 @@ class CafeHook(Hook):
         except Exception:
             message = "Ich kann leider nichts passendes finden :/"
         
-        self.say(peer, message)
+        self.say(peer, {'answer':message})
 
 if __name__ == "__main__":
     h = CafeHook()  # setup the .btnexusrc in your project
