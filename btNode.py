@@ -177,7 +177,7 @@ class Node(object):
         self.setUp()
         self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
         time.sleep(1)
-        self.nexusConnector.listen()
+        self.nexusConnector.listen(ping_interval=self.ping_interval)
 
     def setUp(self):
         """
@@ -191,13 +191,14 @@ class Node(object):
         """
         print("[{}]: cleanUp".format(self.nodeName))
 
-    def connect(self):
+    def connect(self, ping_interval=60):
         """
         Runs this node and listen forever
         This is a blocking call
         """
+        self.ping_interval = ping_interval
         self.setUp()
-        self.nexusConnector.listen()
+        self.nexusConnector.listen(ping_interval=ping_interval)
 
     def run(self):
         """

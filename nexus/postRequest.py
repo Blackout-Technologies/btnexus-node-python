@@ -28,11 +28,6 @@ class PostRequest():
         :param callback: the callback which handles the response
         :type callback: function pointer
         """
-        
-        # check if slash in the end
-        if not url.endswith("/"):
-            url += "/"
-        url += "api"
 
         self.url = url
         self.data = json.dumps(data)

@@ -162,11 +162,11 @@ class NexusConnector():
         else:
             self.logger.removeHandler(self.dbgHandler)
 
-    def listen(self):
+    def listen(self, ping_interval=None):
         """Start listening on Websocket communication"""
         self.ws = WebSocketApp(self.wsConf,
             on_message = self.onMessage, on_error = self.onError,
-            on_close = self.onClose, on_open=self.onOpen)
+            on_close = self.onClose, on_open=self.onOpen, on_ping=self.onPing)
 
         #self.ws.on_open = self.onOpen
 
@@ -176,7 +176,24 @@ class NexusConnector():
         if( "DISABLE_SSL_VERIFY" in os.environ ):
             sslopt = {"cert_reqs": ssl.CERT_NONE}
 
-        self.ws.run_forever(sslopt=sslopt)
+        self.ws.run_forever(sslopt=sslopt, ping_interval=ping_interval)
+
+        # self.ws.run_forever(sockopt=None, sslopt=None,
+        #             ping_interval=0, ping_timeout=None,
+        #             http_proxy_host=None, http_proxy_port=None,
+        #             http_no_proxy=None, http_proxy_auth=None,
+        #             skip_utf8_validation=False,
+        #             host=None, origin=None)
+
+    # def onPong(self, socket, payload):
+    #     print("received Pong")
+        
+
+    def onPing(self):
+        """
+        react with a pong to a ping
+        """
+        self.ws.sock.pong("")
 
     def join(self, group):
         """

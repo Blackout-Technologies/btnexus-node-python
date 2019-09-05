@@ -31,6 +31,12 @@ class BTPostRequest(PostRequest):
         :param callback: the callback which handles the response
         :type callback: function pointer
         """
+
+        # check if slash in the end
+        if not url.endswith("/"):
+            url += "/"
+        url += "api"
+        
         params['api'] = {'version':'5.0', 'intent':intent}
         headers = {'content-type': 'application/json', 'blackout-token': accessToken}
         super(BTPostRequest, self).__init__(url, params, callback, headers = headers)
