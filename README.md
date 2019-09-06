@@ -7,9 +7,9 @@
 |Author|Adrian Lubitz|
 |Author|Marc Fiedler|
 |Email|dev@blackout.ai|
-|Latest stable version|3.0.0|
+|Latest stable version|3.2.3|
 |Required Axon versions| >= 3.0.0|
-|Runs on|Python 2.7+ & Python 3+|
+|Runs on|Python 3.6+|
 |State|`Stable`|
 
 # Known Issues
