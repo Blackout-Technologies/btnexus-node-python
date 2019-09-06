@@ -31,7 +31,7 @@ class Hook(Node):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
-        (either given via environment variable as parameter, CONNECT_HASH or in the .btnexusrc(prioritized in this order))
+        (either given as parameter, via environment variable CONNECT_HASH or in the .btnexusrc(prioritized in this order))
         """
         configpath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
         captionsPath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'captions.json')
