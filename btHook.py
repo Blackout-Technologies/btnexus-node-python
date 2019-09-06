@@ -132,7 +132,7 @@ class Hook(Node):
         :type peer: dict
         
         """
-        self.say(peer, "Hook needs to overload onMessage")  # if not overloaded this is what your hook will say
+        self.say(peer, {'answer':"Hook needs to overload onMessage"})  # if not overloaded this is what your hook will say
 
     def say(self, peer, message):
         """
