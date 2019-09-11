@@ -308,7 +308,7 @@ class NexusConnector():
         :param error: A Message to send to the error topic
         :type error: String
         """
-        print(error)
+        print(error, file=sys.stderr)
         err = Message("publish")
         err["group"] = "blackout-global"
         err["topic"] = self.errorTopic
