@@ -12,3 +12,4 @@ setup(name='btnexus-node-python',
       ],
       )
 ####TODO: add requirements and bring it to the newest style to install via PyPi, is find_packages the best option?
+####TODO: https://realpython.com/pypi-publish-python-package/
