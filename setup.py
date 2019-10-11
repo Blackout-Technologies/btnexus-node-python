@@ -21,7 +21,7 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-      #packages = find_packages(), #TODO I think I dont need packages...
+    packages = find_packages(),
     py_modules=['btNode', 'btHook', 'btPostRequest'],
     install_requires=[
           'pyyaml',
