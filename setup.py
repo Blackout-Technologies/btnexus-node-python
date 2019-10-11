@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='btnexus-node-python',
-    version='3.2.5',
+    version='3.2.7',
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-      #packages = find_packages(), #TODO I think I dont need packages...
+    packages = find_packages(),
     py_modules=['btNode', 'btHook', 'btPostRequest'],
     install_requires=[
           'pyyaml',
