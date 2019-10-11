@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='btnexus-node-python',
-    version='3.2.6',
+    version='3.2.7',
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
