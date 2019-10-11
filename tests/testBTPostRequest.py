@@ -17,7 +17,6 @@ class TestBTPostRequest(unittest.TestCase):
         test to initialize a Hook
         '''
         r = BTPostRequest(intent='intent', params={}, accessToken='token', url='url')
-    
     def test_send(self):
         '''
         test to initialize a Hook
