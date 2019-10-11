@@ -10,7 +10,7 @@ before_script:
 deploy_staging:
   stage: deploy
   variables:
-    TWINE_USERNAME: $STAGING_USERNAME
+    TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
     - twine upload --repository-url https://test.pypi.org/legacy/ dist/*
