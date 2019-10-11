@@ -24,7 +24,7 @@ deploy_staging:
   script:
     - pip install twine # maybe better flit
     - python setup.py sdist
-    - twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+    - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
   only:
     - develop
 
@@ -36,6 +36,6 @@ deploy_production:
   script:
     - pip install twine # maybe better flit
     - python setup.py sdist
-    - twine upload dist/*
+    - twine upload --verbose dist/*
   only:
     - master
