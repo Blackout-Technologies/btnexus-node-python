@@ -1,0 +1,29 @@
+{
+    "name": "my-cool-hook",
+    "title": "My Cool Hook with a new description",
+    "description": "this is the best hook ever",
+    "type": "hook",
+    "keywords": [
+        "ai",
+        "test",
+        "digitalization",
+        "cool"
+    ],
+    "version": "0.2.3",
+    "icon": "icon.png",
+    "banner": "banner.png",
+    "nexusVersion": "2.1.0",
+    "license": "See attached LICENSE file",
+    "scripts": {
+        "compress": "node ./node_modules/btnexus-hook/lib/compressForDelivery.js",
+        "upload": "node ./node_modules/btnexus-hook/lib/dispatchDelivery.js"
+    },
+    "author": {
+        "name": "Marc Fiedler",
+        "url": "mhttps://blackout.ai/",
+        "email": "mf@blackout.ai"
+    },
+    "dependencies": {
+        "btnexus-hook": "2.2.7"
+    }
+ }
