@@ -1,6 +1,6 @@
 """Example for a Node that listens to incoming messages"""
 # System imports
-
+import os
 # 3rd party imports
 from btNode import Node
 
@@ -10,7 +10,7 @@ class ListeningNode(Node):
     """
     This Node shows how to subscribe to different Messages
     """
-    def nodeConnected(self):
+    def onConnected(self):
         """
         This will be executed after a the Node is succesfully connected to the btNexus
         Here you need to subscribe and set everything else up.
@@ -48,5 +48,8 @@ class ListeningNode(Node):
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    listeningNode = ListeningNode()
-    listeningNode.run() # This call is blocking
+    token = os.environ["TOKEN"]
+    axon = os.environ["AXON_HOST"]
+    debug = "NEXUS_DEBUG" in os.environ
+    listeningNode = ListeningNode(token, axon, debug)
+    listeningNode.connect() # This call is blocking

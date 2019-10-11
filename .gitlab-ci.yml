@@ -1,0 +1,41 @@
+image: python:3.6-alpine
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_package:
+  stage: build
+  script:
+    - pip install .
+
+run_tests:
+  stage: test
+  script:
+    - pip install .
+    - python -m tests
+
+deploy_staging:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
+    TWINE_PASSWORD: $STAGING_PASSWORD
+  script:
+    - pip install twine 
+    - python setup.py sdist
+    - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+  only:
+    - develop
+
+deploy_production:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PRODUCTION_USERNAME
+    TWINE_PASSWORD: $PRODUCTION_PASSWORD
+  script:
+    - pip install twine 
+    - python setup.py sdist
+    - twine upload --verbose dist/*
+  only:
+    - master

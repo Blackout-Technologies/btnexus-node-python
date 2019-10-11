@@ -7,6 +7,7 @@ import socket
 import sys
 from collections import defaultdict
 import inspect
+import os
 
 # 3rd Party imports
 
@@ -22,16 +23,31 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 class Node(object):
     """Blackout Nexus node"""
 
-    def __init__(self):
+    def __init__(self, token=None,  axonURL=None,  debug=None):
         """
         Constructor sets up the NexusConnector.
-        The following environment variables need to be set:
-        TOKEN: is the AccessToken for the btNexus
-        AXON_HOST: is the url to the axon to use
-        NEXUS_DEBUG: if set(to anything) the debug option is on
-        """
-        self.nexusConnector = NexusConnector(self.nodeConnected, parent = self)
 
+        :param token: AccessToken for the btNexus
+        :type token: String
+        :param axonURL: URL for the Axon(InstanceURL)
+        :type axonURL: String
+        :param debug: switch for debug messages
+        :type debug: bool
+        """
+        if token == None:
+            token = os.environ["TOKEN"]
+        if axonURL == None:
+            axonURL = os.environ["AXON_HOST"]
+        if debug == None:
+            self.debug = "NEXUS_DEBUG" in os.environ
+        else:
+            self.debug = debug
+
+        self.nodeName = self.__class__.__name__
+        if not axonURL.endswith("/"):
+            axonURL += "/"
+        axonURL += self.nodeName
+        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL, self.debug)
 
     def linkModule(self, module,group, topic):
         """
@@ -98,8 +114,6 @@ class Node(object):
         info["group"] = group
         self.nexusConnector.publish(info)
 
-
-
     def publishDebug(self, debug):
         """
         Publish a Debug message on the btNexus if debug is active
@@ -139,19 +153,57 @@ class Node(object):
         """
         self.publishError(error)
 
+    def onError(self, error):
+        """
+        Handling of Errors. If not overloaded it just forwards the error to the nexusConnector which just prints and publishes it if possible
+        """
+        self.nexusConnector.onError(None, "[{}] Error: {}".format(self.nodeName, error))
 
-    def nodeConnected(self):
+    def onConnected(self):
         """
         Is called when this node was connected
         This needs to be overloaded to subscribe to messages.
         """
-        pass
+        if self.debug:
+            print("You are using deprecated method nodeConnected(). You should use onConnected()")
+        self.nodeConnected()
 
+    def onDisconnected(self):
+        """
+        This will be executed after a the Node is disconnected from the btNexus
+        If not implemented the Node tries to reconnect
+        """
+        self.cleanUp()
+        self.setUp()
+        self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
+        time.sleep(1)
+        self.nexusConnector.listen(ping_interval=self.ping_interval)
 
+    def setUp(self):
+        """
+        Implement this to handle the things, which should be done before the connection to nexus is established.
+        """
+        print("[{}]: setUp".format(self.nodeName))
 
-    def run(self):
+    def cleanUp(self):
+        """
+        Implement this to handle the things, which should be done when you disconnect the node.
+        """
+        print("[{}]: cleanUp".format(self.nodeName))
+
+    def connect(self, ping_interval=60):
         """
         Runs this node and listen forever
         This is a blocking call
         """
-        self.nexusConnector.listen()
+        self.ping_interval = ping_interval
+        self.setUp()
+        self.nexusConnector.listen(ping_interval=ping_interval)
+
+    def run(self):
+        """
+        DEPRECATED: Will be replaced with connect(). Is here for backwards compatibility.
+        """
+        if self.debug:
+            print("You are using deprecated method run(). You should use connect()")
+        self.connect()
