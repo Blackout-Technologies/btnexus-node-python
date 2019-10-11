@@ -1,11 +1,19 @@
 image: python:3.6-alpine
 
 stages:
+  - build
+  - test
   - deploy
 
-before_script:
-   - pip install twine # maybe better flit
-   - python setup.py sdist
+build_package:
+  stage: build
+  script:
+    - pip install .
+
+run_tests:
+  stage: test
+  script:
+    - python -m tests
 
 deploy_staging:
   stage: deploy
@@ -13,6 +21,8 @@ deploy_staging:
     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
+    - pip install twine # maybe better flit
+    - python setup.py sdist
     - twine upload --repository-url https://test.pypi.org/legacy/ dist/*
   only:
     - develop
@@ -23,6 +33,8 @@ deploy_production:
     TWINE_USERNAME: $PRODUCTION_USERNAME
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
+    - pip install twine # maybe better flit
+    - python setup.py sdist
     - twine upload dist/*
   only:
     - master
