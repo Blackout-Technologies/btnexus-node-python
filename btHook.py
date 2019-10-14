@@ -134,7 +134,7 @@ class Hook(Node):
         """
         self.say(peer, {'answer':"Hook needs to overload onMessage"})  # if not overloaded this is what your hook will say
 
-    def say(self, peer, message):
+    def say(self, peer, message): # TODO: check if message is just a string wrap it in the answer field ;)
         """
         publishes the hooks response.
 
