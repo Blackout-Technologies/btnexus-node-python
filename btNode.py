@@ -49,7 +49,7 @@ class Node(object):
         if not self.axonURL.endswith("/"):
             self.axonURL += "/"
         
-        self.nexusConnector = NexusConnector(self.onConnected, self, token, self.axonURL + self.nodeName, self.debug)
+        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL + self.nodeName, self.debug)
 
     def linkModule(self, module,group, topic):
         """
