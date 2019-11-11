@@ -75,14 +75,15 @@ class Message():
         """
 
         protocolVersion = self.data['api']['version']
-        if( protocolVersion != self.version ):
-            # Version missmatch
-            if( protocolVersion[0] != self.version[0]):
-                # Major version missmatch
-                raise Exception("Major version missmatch {} != {}".format(protocolVersion[0], self.version[0]))
-                return
-            else:
-                raise Exception("Minor version missmatch")
+        # TODO should be fixed with semver, w/ down compatibility
+        #if( protocolVersion != self.version ):
+        #    # Version missmatch
+        #    if( protocolVersion[0] != self.version[0]):
+        #        # Major version missmatch
+        #        raise Exception("Major version missmatch {} != {}".format(protocolVersion[0], self.version[0]))
+        #        return
+        #    else:
+        #        raise Exception("Minor version missmatch")
 
         self.valid = True
 
