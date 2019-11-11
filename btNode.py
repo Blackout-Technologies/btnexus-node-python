@@ -34,20 +34,22 @@ class Node(object):
         :param debug: switch for debug messages
         :type debug: bool
         """
-        if token == None:
-            token = os.environ["TOKEN"]
-        if axonURL == None:
-            axonURL = os.environ["AXON_HOST"]
+        self.token = token
+        if self.token == None:
+            self.token = os.environ["TOKEN"]
+        self.axonURL = axonURL
+        if self.axonURL == None:
+            self.axonURL = os.environ["AXON_HOST"]
         if debug == None:
             self.debug = "NEXUS_DEBUG" in os.environ
         else:
             self.debug = debug
 
         self.nodeName = self.__class__.__name__
-        if not axonURL.endswith("/"):
-            axonURL += "/"
-        axonURL += self.nodeName
-        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL, self.debug)
+        if not self.axonURL.endswith("/"):
+            self.axonURL += "/"
+        
+        self.nexusConnector = NexusConnector(self.onConnected, self, token, axonURL + self.nodeName, self.debug)
 
     def linkModule(self, module,group, topic):
         """
