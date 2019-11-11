@@ -40,3 +40,24 @@ class BTPostRequest(PostRequest):
         params['api'] = {'version':'5.0', 'intent':intent}
         headers = {'content-type': 'application/json', 'blackout-token': accessToken}
         super(BTPostRequest, self).__init__(url, params, callback, headers = headers)
+
+if __name__ == '__main__':
+    import os
+    def printResponse(response):
+        print('Response: {}'.format(response))
+    token = os.environ["TOKEN"]
+    axon = os.environ["AXON_HOST"]
+    # print ("URL: {}".format(axon))
+    # print ("Token: {}".format(token))
+    personalityId = os.environ["PERSONALITYID"]
+    integrationId = "f0458d18-3108-11e9-b210-d663bd873d93" # TODO: This is the robot integrationId - this needs to be set correctly
+    params = {
+        'integrationId': integrationId,
+        'personalityId': personalityId
+    }
+    print('params: {}'.format(params))
+    print('Token: {}'.format(token))
+    print('url: {}'.format('https://' + axon))
+
+    BTPostRequest('sessionAccessRequest', params, accessToken=token, url='https://' + axon, callback=printResponse).send()
+

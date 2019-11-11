@@ -48,11 +48,14 @@ class PostRequest():
         if self.callback:
             self.callback(r.json())
 
-    def send(self):
+    def send(self, blocking=False):
         """
-        sending the request in a thread and trigger the callback when response is ready
+        sending the request in a thread(if blocking=False) and triggers the callback when response is ready
         """
-        threading.Thread(target=self._send).start()
+        if not blocking:
+            threading.Thread(target=self._send).start()
+        else:
+            self._send()
 
 
 if __name__ == "__main__":
