@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='btnexus-node-python',
-    version='3.2.10',
+    version='3.2.12',
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -22,13 +22,14 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.7",
     ],
     packages = find_packages(),
-    py_modules=['btNode', 'btHook', 'btPostRequest'],
+    py_modules=['btNode', 'btNodeIO', 'btHook', 'btPostRequest'],
     install_requires=[
           'pyyaml',
           'six',
           'certifi',
           'backports.ssl_match_hostname',
-          'requests'
+          'requests',
+          'python-socketio'
     ],
 )
 ####TODO: add requirements and bring it to the newest style to install via PyPi, is find_packages the best option?
