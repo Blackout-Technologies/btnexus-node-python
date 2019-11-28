@@ -177,9 +177,9 @@ class Node(object):
         """
         self.cleanUp()
         self.setUp()
-        self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
-        time.sleep(1)
-        self.nexusConnector.listen(ping_interval=self.ping_interval)
+        # self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
+        # time.sleep(1)
+        # self.nexusConnector.listen(ping_interval=self.ping_interval)
 
     def setUp(self):
         """

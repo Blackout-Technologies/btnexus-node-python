@@ -22,7 +22,7 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.7",
     ],
     packages = find_packages(),
-    py_modules=['btNode', 'btNodeIO', 'btHook', 'btPostRequest'],
+    py_modules=['btNode', 'btNodeIO', 'btHook', 'btPostRequest'], #TODO: take out the IO stuff
     install_requires=[
           'pyyaml',
           'six',

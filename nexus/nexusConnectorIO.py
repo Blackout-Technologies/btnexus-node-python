@@ -32,7 +32,7 @@ class NexusConnector():
     """The NexusConnector handles everything from connecting, subscibing and publishing messages in the btNexus"""
     version = "3.1"
 
-    def __init__(self, connectCallback, parent,  token,  axonURL,  debug):
+    def __init__(self, connectCallback, parent,  token,  axonURL,  debug, logger = None):
         """
         Sets up all configurations.
 
@@ -46,6 +46,8 @@ class NexusConnector():
         :type axonURL: String
         :param debug: switch for debug messages
         :type debug: bool
+        :param logger: You can give a logger if you want otherwise the 'btNexus' Logger is used
+        :type logger: logging.Logger
         """
         #Set env for certs if not set
         os.environ["WEBSOCKET_CLIENT_CA_BUNDLE"] = certifi.where()
@@ -54,7 +56,7 @@ class NexusConnector():
         self.errorTopic = "ai.blackout.error"
         self.parent = parent
         self.parentName = self.parent.nodeName
-        self.nodeId = str(uuid.uuid4())
+        self.nodeId = None #str(uuid.uuid4())
         self.protocol = "ws" # TODO: needs to be changed back to wss at some point!
         self.token = token
         self.axon = axonURL
@@ -64,29 +66,32 @@ class NexusConnector():
         self.wsConf = self.protocol + "://"+ str(self.axon)
 
         # self.ws = None
-        self.sio = socketio.Client()
-        self.defineCallbacks()
 
-        # TODO: How to use the logger correctly!?!
-        self.logger = logging.getLogger('websocket')
-        self.errHandler = logging.StreamHandler(self.parent)
-        self.errHandler.setLevel(logging.ERROR)
-        self.logger.addHandler(self.errHandler)
-        # Adding handler for Debug
-        self.dbgStream = io.StringIO()
-        self.dbgStream.write = self.parent.publishWarning
-        self.dbgHandler = logging.StreamHandler(self.dbgStream)
-        self.dbgHandler.setLevel(logging.DEBUG)
+        if not logger:
+            self.logger = logging.getLogger('btNexus')
+            if self.debug:
+                self.logger.setLevel(logging.DEBUG)
+            else:
+                self.logger.setLevel(logging.INFO)
+            infHandler = logging.StreamHandler()
+            infHandler.setLevel(logging.INFO)
+            formatter = logging.Formatter('[%(levelname)s]%(name)s - %(asctime)s : %(message)s')
+            infHandler.setFormatter(formatter)
+            infHandler.setLevel(logging.NOTSET)
+            self.logger.addHandler(infHandler)
+        else: 
+            self.logger = logger
+
 
         self.connectCallback = connectCallback
         self.callbacks = defaultdict(lambda: defaultdict(dict)) # saves every callback under a group and a topic, even if joining the group wasnt successufull(Messages will be filtered by the Axon)
 
         self.isConnected = False
         self.isRegistered = False
-        sys.stderr = self.parent
+        # sys.stderr = self.parent
 
     @classmethod
-    def copyNexusForReconnect(cls, oldNexusConnector):
+    def copyNexusForReconnect(cls, oldNexusConnector):# TODO: No longer needed with socketIO
         """
         Returns a fresh nexusConnector to reconnect.
         """
@@ -169,35 +174,33 @@ class NexusConnector():
 
     def listen(self, ping_interval=None):
         """Start listening on Websocket communication"""
-        # TODO: SSLOPTS
+        # SSLOPTS
+        ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
+        print('[SSL_VERIFY]: {}'.format(ssl_verify)) 
+        print('[SELF.DEBUG]: {}'.format(self.debug)) 
+
+        # loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+        # # print('[LOGGERS]: {}'.format(loggers))
+        # logger = logging.getLogger('myThging')
+        # logger.setLevel(logging.DEBUG)
+        # ch = logging.StreamHandler()
+        # ch.setLevel(logging.DEBUG)
+        # # fh = logging.FileHandler('spam.log')
+        # # fh.setLevel(logging.DEBUG)
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # ch.setFormatter(formatter)
+
+        # logger.addHandler(ch)
+        print(self.logger)
+        self.logger.debug('HALLO WELT FROM A LOGGER!')
+
+        self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger)
+        self.defineCallbacks()
+
         # TODO: PING INTERVAL
         print('[CONF]: {}'.format(self.wsConf))
         self.sio.connect(self.wsConf)
         self.sio.wait()
-
-
-
-
-        # self.ws = WebSocketApp(self.wsConf,
-        #     on_message = self.onMessage, on_error = self.onError,
-        #     on_close = self.onClose, on_open=self.onOpen, on_ping=self.onPing)
-
-        # #self.ws.on_open = self.onOpen
-
-        # #self.setDebugMode(self.parent.debug)
-        # #self.ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
-        # sslopt = None
-        # if( "DISABLE_SSL_VERIFY" in os.environ ):
-        #     sslopt = {"cert_reqs": ssl.CERT_NONE}
-
-        # self.ws.run_forever(sslopt=sslopt, ping_interval=ping_interval)
-
-        # self.ws.run_forever(sockopt=None, sslopt=None,
-        #             ping_interval=0, ping_timeout=None,
-        #             http_proxy_host=None, http_proxy_port=None,
-        #             http_no_proxy=None, http_proxy_auth=None,
-        #             skip_utf8_validation=False,
-        #             host=None, origin=None)
 
     # def onPong(self, socket, payload):
     #     print("received Pong")
@@ -280,12 +283,11 @@ class NexusConnector():
         # Add the node id as a source to that this node does not receive its own
         # messages
 
-        # TODO: only change the message here - event->intent
         message['nodeId'] = self.nodeId
-        # if self.isConnected:
-        #     self.ws.send(message.getJsonContent())
-        # else:
-        #     raise NexusNotConnectedException()
+        if self.isConnected:
+            self.sio.emit('message', message.getJsonContent())
+        else:
+            raise NexusNotConnectedException()
 
     def publishDebug(self, debug):
         """
@@ -333,12 +335,10 @@ class NexusConnector():
 
 
 
-    def onMessage(self, ws, message):
+    def onMessage(self, message):
         """
         React on a incoming Message and decide what to do.
 
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
         :param message: The message to react on
         :type message: String
         """
@@ -349,11 +349,11 @@ class NexusConnector():
         if( msg["api"]["intent"] == "registerSuccess" ):
             print("[{}]: Registered successfully".format(self.parentName))
             self.isRegistered = True
-            self.isConnected = True
             self.__onConnected()
             #TODO: check here for versionmissmatch - just like in java
         elif ( msg["api"]["intent"] == "registerFailed" ):
             print("[{}]: Register failed with reason: {}".format(self.parentName, msg["reason"]))
+            # self.sio.disconnect()
         elif( msg["api"]["intent"] == "subscribeSuccess" ):
             print("[{}]: Subscribed to: {}".format(self.parentName, msg["topic"]))
         elif ( msg["api"]["intent"] == "subscribeFailed" ):
@@ -380,53 +380,49 @@ class NexusConnector():
                     self.publishError(traceback.format_exc())
 
 
-
-
-    def onError(self, ws, error):
-        """
-        React on a incoming Errors.
-
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
-        :param error: The error to react on
-        :type meserrorsage: exception object
-        """
-        self.publishError("[{}] Error: {}".format(self.parentName, error))
-
-    def onClose(self, ws):
-        """
-        React on a closing the connection
-
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
-        """
-        self.isConnected = False
-        print("[Nexus]: Connection closed")
-        self.parent.onDisconnected()
-
-    # def onOpen(self, ws):
-    #     """
-    #     Things to do, when the WebsocketConnection is opened.
-
-    #     :param ws: a pointer to the Websocket object
-    #     :type ws: WebSocketApp
-    #     """
-    #     # print("Registering in the Nexus")
-    #     msg = Message("register")
-    #     msg["token"] = self.token #TODO: is this the access token? for older version use interface
-    #     msg["host"] = socket.gethostname()
-    #     msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
-    #     msg["id"] = self.nodeId
-    #     msg["node"] = {}    #TODO: What should be in this field?
-    #     self.ws.send(msg.getJsonContent())
-
     def defineCallbacks(self):
         @self.sio.event
         def connect():
             print('connection established')
+            self.isConnected = True
+            self.sio.emit('ping', {})
         
         @self.sio.on('btnexus-registration')
         def register(data):
             print('[btnexus-registration]: {}'.format(data))
-            # TODO: set my nodeId and answer with the message from onOpen
-            # TODO: js doesnt set the id correctly?
+            self.nodeId = data['nodeId']
+            msg = Message("register")
+            msg["token"] = self.token 
+            msg["host"] = socket.gethostname()
+            msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
+            msg["id"] = self.nodeId
+            msg["node"] = {}    #TODO: What should be in this field?
+            self.publish(msg)
+
+            print('[PING_INTERVAL]: {}'.format(self.sio.eio.ping_interval))
+            print('[PING_TIMEOUT]: {}'.format(self.sio.eio.ping_timeout))
+            print('[PING_LOOP_TASK]: {}'.format(self.sio.eio.ping_loop_task))
+            print('[PING_LOOP_EVENT]: {}'.format(self.sio.eio.ping_loop_event))
+        
+        @self.sio.on('message')
+        def onMessage(data):
+            self.onMessage(data)
+
+        @self.sio.event
+        def connect_error():
+            print("The connection failed!")
+
+        @self.sio.event
+        def disconnect():
+            self.isConnected = False
+            print("[Nexus]: Connection closed")
+            self.parent.onDisconnected()
+        
+        @self.sio.on('pong')
+        def onPong(data):
+            print('[PONG]{}'.format(data))
+        
+        @self.sio.on('ping')
+        def onPing(data):
+            self.sio.emit('pong', {})
+            print('[PING]: {}'.format(data))
