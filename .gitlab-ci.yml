@@ -23,7 +23,7 @@ deploy_staging:
     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
-    - pip install twine 
+    - pip install twine==2.0
     - python setup.py sdist
     - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
   only:
@@ -35,7 +35,7 @@ deploy_production:
     TWINE_USERNAME: $PRODUCTION_USERNAME
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
-    - pip install twine 
+    - pip install twine==2.0
     - python setup.py sdist
     - twine upload --verbose dist/*
   only:
