@@ -16,10 +16,11 @@ from threading import Thread
 
 
 # 3rd party imports
+import socketio
 
 # local imports
-from .btWebsocket import *
-# from websocket import *
+# from .btWebsocket import *
+# # from websocket import *
 from .message import Message
 from .nexusExceptions import *
 
@@ -27,11 +28,13 @@ from .nexusExceptions import *
 __author__      = "Marc Fiedler, Gheorghe Lisca, Adrian Lubitz"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
+
 class NexusConnector():
     """The NexusConnector handles everything from connecting, subscibing and publishing messages in the btNexus"""
-    version = "3.1"
+    version = "4.0"
+    
 
-    def __init__(self, connectCallback, parent,  token,  axonURL,  debug):
+    def __init__(self, connectCallback, parent,  token,  axonURL,  debug, logger):
         """
         Sets up all configurations.
 
@@ -45,6 +48,8 @@ class NexusConnector():
         :type axonURL: String
         :param debug: switch for debug messages
         :type debug: bool
+        :param logger: You can give a logger if you want otherwise the 'btNexus' Logger is used
+        :type logger: logging.Logger
         """
         #Set env for certs if not set
         os.environ["WEBSOCKET_CLIENT_CA_BUNDLE"] = certifi.where()
@@ -53,8 +58,8 @@ class NexusConnector():
         self.errorTopic = "ai.blackout.error"
         self.parent = parent
         self.parentName = self.parent.nodeName
-        self.nodeId = str(uuid.uuid4())
-        self.protocol = "wss"
+        self.nodeId = None #str(uuid.uuid4())
+        self.protocol = "ws" # TODO: needs to be changed back to wss at some point!
         self.token = token
         self.axon = axonURL
         self.debug = debug
@@ -62,40 +67,22 @@ class NexusConnector():
 
         self.wsConf = self.protocol + "://"+ str(self.axon)
 
-        self.ws = None
-        self.logger = logging.getLogger('websocket')
-        self.errHandler = logging.StreamHandler(self.parent)
-        self.errHandler.setLevel(logging.ERROR)
-        self.logger.addHandler(self.errHandler)
-        # Adding handler for Debug
-        self.dbgStream = io.StringIO()
-        self.dbgStream.write = self.parent.publishWarning
-        self.dbgHandler = logging.StreamHandler(self.dbgStream)
-        self.dbgHandler.setLevel(logging.DEBUG)
+        self.logger = logger
+
 
         self.connectCallback = connectCallback
         self.callbacks = defaultdict(lambda: defaultdict(dict)) # saves every callback under a group and a topic, even if joining the group wasnt successufull(Messages will be filtered by the Axon)
 
         self.isConnected = False
         self.isRegistered = False
-        sys.stderr = self.parent
 
-    @classmethod
-    def copyNexusForReconnect(cls, oldNexusConnector):
-        """
-        Returns a fresh nexusConnector to reconnect.
-        """
-        newNexusConnector = NexusConnector(oldNexusConnector.connectCallback, oldNexusConnector.parent, oldNexusConnector.token, oldNexusConnector.axon, oldNexusConnector.debug)
-        newNexusConnector.nodeId = oldNexusConnector.nodeId
-        #newNexusConnector.callbacks = oldNexusConnector.callbacks
-        return newNexusConnector
 
     def __onConnected(self):
         """
         Shadow function for the connectCallback
         """
         self.connectCallback()
-        self.publishDebug("{} succesfully started :)".format(self.parentName))
+        self.logger.log(self.parent.NEXUSINFO, "{} succesfully started :)".format(self.parentName))
 
     def callbackManager(self, msg):
         """
@@ -151,49 +138,19 @@ class NexusConnector():
 
     def setDebugMode(self, mode):
         """
-        DEPRECATED
-        Activate/Deactivate the Debug trace
-
+        Activate/Deactivate the Debug 
         """
-        #enableTrace(mode)#TODO:gucken, wo das hingesendet wird und das auf ai.blackout.error streamen
-        if mode:
-            self.logger.addHandler(self.dbgHandler)
-            # self.logger.warning("Debug is active")
-        else:
-            self.logger.removeHandler(self.dbgHandler)
+        self.debug = mode
 
     def listen(self, ping_interval=None):
         """Start listening on Websocket communication"""
-        self.ws = WebSocketApp(self.wsConf,
-            on_message = self.onMessage, on_error = self.onError,
-            on_close = self.onClose, on_open=self.onOpen, on_ping=self.onPing)
+        # SSLOPTS
+        ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
+        self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger)
+        self.defineCallbacks()
 
-        #self.ws.on_open = self.onOpen
-
-        #self.setDebugMode(self.parent.debug)
-        #self.ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
-        sslopt = None
-        if( "DISABLE_SSL_VERIFY" in os.environ ):
-            sslopt = {"cert_reqs": ssl.CERT_NONE}
-
-        self.ws.run_forever(sslopt=sslopt, ping_interval=ping_interval)
-
-        # self.ws.run_forever(sockopt=None, sslopt=None,
-        #             ping_interval=0, ping_timeout=None,
-        #             http_proxy_host=None, http_proxy_port=None,
-        #             http_no_proxy=None, http_proxy_auth=None,
-        #             skip_utf8_validation=False,
-        #             host=None, origin=None)
-
-    # def onPong(self, socket, payload):
-    #     print("received Pong")
-        
-
-    def onPing(self):
-        """
-        react with a pong to a ping
-        """
-        self.ws.sock.pong("")
+        self.sio.connect(self.wsConf)
+        self.sio.wait()
 
     def join(self, group):
         """
@@ -243,7 +200,6 @@ class NexusConnector():
         if funcName == None:
             funcName = callback.__name__
         self.callbacks[group][topic][funcName] = callback
-        # print ("self.callbacks: {}".format(self.callbacks))
 
     def unsubscribe(self, group, topic):
         """
@@ -265,9 +221,10 @@ class NexusConnector():
         """
         # Add the node id as a source to that this node does not receive its own
         # messages
+
         message['nodeId'] = self.nodeId
         if self.isConnected:
-            self.ws.send(message.getJsonContent())
+            self.sio.emit('message', message.getJsonContent())
         else:
             raise NexusNotConnectedException()
 
@@ -279,7 +236,7 @@ class NexusConnector():
         :type debug: String
         """
         if self.debug:
-            print(debug)
+            self.logger.debug(debug)
             deb = Message("publish")
             deb["group"] = "blackout-global"
             deb["topic"] = self.debugTopic
@@ -294,7 +251,7 @@ class NexusConnector():
         :param warning: A Message to send to the warning topic
         :type warning: String
         """
-        print(warning)
+        self.logger.warning(warning)
         warn = Message("publish")
         warn["group"] = "blackout-global"
         warn["topic"] = self.warningTopic
@@ -308,7 +265,7 @@ class NexusConnector():
         :param error: A Message to send to the error topic
         :type error: String
         """
-        print(error)
+        self.logger.error(error)
         err = Message("publish")
         err["group"] = "blackout-global"
         err["topic"] = self.errorTopic
@@ -317,43 +274,38 @@ class NexusConnector():
 
 
 
-    def onMessage(self, ws, message):
+    def onMessage(self, message):
         """
         React on a incoming Message and decide what to do.
 
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
         :param message: The message to react on
         :type message: String
         """
-        # print("Got Message: {}".format(message))
         msg = Message()
         msg.loadFromJsonString(message)
-        #print("Frisch geladene Message: {}".format(msg.data))
         if( msg["api"]["intent"] == "registerSuccess" ):
-            print("[{}]: Registered successfully".format(self.parentName))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Registered successfully".format(self.parentName))
             self.isRegistered = True
-            self.isConnected = True
             self.__onConnected()
             #TODO: check here for versionmissmatch - just like in java
         elif ( msg["api"]["intent"] == "registerFailed" ):
-            print("[{}]: Register failed with reason: {}".format(self.parentName, msg["reason"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Register failed with reason: {}".format(self.parentName, msg["reason"]))
         elif( msg["api"]["intent"] == "subscribeSuccess" ):
-            print("[{}]: Subscribed to: {}".format(self.parentName, msg["topic"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Subscribed to: {}".format(self.parentName, msg["topic"]))
         elif ( msg["api"]["intent"] == "subscribeFailed" ):
-            print("[{}]: Failed to Subscribed to: {}".format(self.parentName, msg["topic"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to Subscribed to: {}".format(self.parentName, msg["topic"]))
         elif ( msg["api"]["intent"] == "joinSuccess" ):
-            print("[{}]: Joined Group: {}".format(self.parentName, msg["groupName"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Joined Group: {}".format(self.parentName, msg["groupName"]))
         elif ( msg["api"]["intent"] == "joinFailed" ):
-            print("[{}]: Failed to join Group: {}".format(self.parentName, msg["groupName"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to join Group: {}".format(self.parentName, msg["groupName"]))
         elif ( msg["api"]["intent"] == "leaveSuccess" ):
-            print("[{}]: Left Group: {}".format(self.parentName, msg["groupName"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Left Group: {}".format(self.parentName, msg["groupName"]))
         elif ( msg["api"]["intent"] == "leaveFailed" ):
-            print("[{}]: Failed to leave Group: {}".format(self.parentName, msg["groupName"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to leave Group: {}".format(self.parentName, msg["groupName"]))
         elif ( msg["api"]["intent"] == "unsubscribeSuccess" ):
-            print("[{}]: Unsubscribed from topic: {}".format(self.parentName, msg["topic"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Unsubscribed from topic: {}".format(self.parentName, msg["topic"]))
         elif ( msg["api"]["intent"] == "unsubscribeFailed" ):
-            print("[{}]: Failed to unsubscribe from topic: {}".format(self.parentName, msg["topic"]))
+            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to unsubscribe from topic: {}".format(self.parentName, msg["topic"]))
         else:
             # Interaction is only allowed with registered nodes
             if( self.isRegistered ):
@@ -364,42 +316,43 @@ class NexusConnector():
                     self.publishError(traceback.format_exc())
 
 
+    def defineCallbacks(self):
+        @self.sio.event
+        def connect():
+            self.logger.log(self.parent.NEXUSINFO, 'connection established')
+            self.isConnected = True
+            self.sio.emit('ping', {})
+        
+        @self.sio.on('btnexus-registration')
+        def register(data):
+            self.nodeId = data['nodeId']
+            msg = Message("register")
+            msg["token"] = self.token 
+            msg["host"] = socket.gethostname()
+            msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
+            msg["id"] = self.nodeId
+            msg["node"] = {}    #TODO: What should be in this field?
+            self.publish(msg)
+        
+        @self.sio.on('message')
+        def onMessage(data):
+            self.onMessage(data)
 
+        @self.sio.event
+        def connect_error():
+            self.logger.log(self.parent.NEXUSINFO, "[Nexus]: The connection failed!")
 
-    def onError(self, ws, error):
-        """
-        React on a incoming Errors.
-
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
-        :param error: The error to react on
-        :type meserrorsage: exception object
-        """
-        self.publishError("[{}] Error: {}".format(self.parentName, error))
-
-    def onClose(self, ws):
-        """
-        React on a closing the connection
-
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
-        """
-        self.isConnected = False
-        print("[Nexus]: Connection closed")
-        self.parent.onDisconnected()
-
-    def onOpen(self, ws):
-        """
-        Things to do, when the WebsocketConnection is opened.
-
-        :param ws: a pointer to the Websocket object
-        :type ws: WebSocketApp
-        """
-        # print("Registering in the Nexus")
-        msg = Message("register")
-        msg["token"] = self.token #TODO: is this the access token? for older version use interface
-        msg["host"] = socket.gethostname()
-        msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
-        msg["id"] = self.nodeId
-        msg["node"] = {}    #TODO: What should be in this field?
-        self.ws.send(msg.getJsonContent())
+        @self.sio.event
+        def disconnect():
+            self.isConnected = False
+            self.logger.log(self.parent.NEXUSINFO, "[Nexus]: Connection closed")
+            self.parent.onDisconnected()
+        
+        @self.sio.on('pong')
+        def onPong(data):
+            self.logger.info('[PONG]{}'.format(data))
+        
+        @self.sio.on('ping')
+        def onPing(data):
+            self.sio.emit('pong', {})
+            self.logger.info('[PING]: {}'.format(data))

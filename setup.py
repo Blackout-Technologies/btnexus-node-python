@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 
 setup(name='btnexus-node-python',
-    version='3.2.12',
+    version='4.0.0',
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -22,7 +22,7 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.7",
     ],
     packages = find_packages(),
-    py_modules=['btNode', 'btNodeIO', 'btHook', 'btPostRequest'], #TODO: take out the IO stuff
+    py_modules=['btNode', 'btNodeV3', 'btHook', 'btPostRequest'], #TODO: take out the IO stuff
     install_requires=[
           'pyyaml',
           'six',

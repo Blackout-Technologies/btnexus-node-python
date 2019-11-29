@@ -12,6 +12,11 @@
 |Runs on|Python 3.6+|
 |State|`Stable`|
 
+# VERSION 4
+Version 4 changed the protocol to socketIO - Therefore it only works with **Dynamic Davinci** 
+
+*An old version of the Node is still available in btNodeV3*
+
 # Known Issues
 Since Version 3.1 Node automatically reconnect on an Error. That means any occurring error causes a reconnect. **KeyboardInterupt is an Error. If you want to terminate your script use `ctrl + Alt Gr + \`**
 

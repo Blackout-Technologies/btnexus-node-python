@@ -22,8 +22,15 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
 class Node(object):
     """Blackout Nexus node"""
+    NEXUSINFO = 21
 
-    def __init__(self, token=None,  axonURL=None,  debug=None):
+    @classmethod
+    def nexusFormat(cls, record):
+        if record.levelno == cls.NEXUSINFO:
+            record.levelname = 'NEXUSINFO'   
+        return '[{}] {} - {} : {}'.format(record.levelname, record.name, record.created, record.msg)
+
+    def __init__(self, token=None,  axonURL=None,  debug=None, logger=None):
         """
         Constructor sets up the NexusConnector.
 
@@ -48,8 +55,31 @@ class Node(object):
         self.nodeName = self.__class__.__name__
         if not self.axonURL.endswith("/"):
             self.axonURL += "/"
+
+        if not logger:
+            self.logger = logging.getLogger('btNexus.{}'.format(self.nodeName))
+            if self.debug:
+                self.logger.setLevel(logging.DEBUG)
+                # INFO Handler
+                infHandler = logging.StreamHandler()
+                infHandler.setLevel(logging.NOTSET)
+                formatter = logging.Formatter('[%(levelname)s]%(name)s - %(asctime)s : %(message)s')
+                infHandler.setFormatter(formatter)
+                self.logger.addHandler(infHandler)
+            else:
+                self.logger.setLevel(logging.INFO)
+                # NexusInfo Handler
+                nexInfHandler = logging.StreamHandler()
+                nexInfHandler.setLevel(self.NEXUSINFO)
+                formatter = logging.Formatter()#'[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
+                formatter.format = Node.nexusFormat
+                nexInfHandler.setFormatter(formatter)
+                self.logger.addHandler(nexInfHandler)
+            
+        else: 
+            self.logger = logger
         
-        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL + self.nodeName, self.debug)
+        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL + self.nodeName, self.debug, self.logger)
 
     def linkModule(self, module,group, topic):
         """
@@ -167,7 +197,7 @@ class Node(object):
         This needs to be overloaded to subscribe to messages.
         """
         if self.debug:
-            print("You are using deprecated method nodeConnected(). You should use onConnected()")
+            self.logger.warning("You are using deprecated method nodeConnected(). You should use onConnected()")
         self.nodeConnected()
 
     def onDisconnected(self):
@@ -177,21 +207,18 @@ class Node(object):
         """
         self.cleanUp()
         self.setUp()
-        self.nexusConnector = NexusConnector.copyNexusForReconnect(self.nexusConnector) #here
-        time.sleep(1)
-        self.nexusConnector.listen(ping_interval=self.ping_interval)
 
     def setUp(self):
         """
         Implement this to handle the things, which should be done before the connection to nexus is established.
         """
-        print("[{}]: setUp".format(self.nodeName))
+        self.logger.info("[{}]: setUp".format(self.nodeName))
 
     def cleanUp(self):
         """
         Implement this to handle the things, which should be done when you disconnect the node.
         """
-        print("[{}]: cleanUp".format(self.nodeName))
+        self.logger.info("[{}]: cleanUp".format(self.nodeName))
 
     def connect(self, ping_interval=60):
         """
@@ -207,5 +234,5 @@ class Node(object):
         DEPRECATED: Will be replaced with connect(). Is here for backwards compatibility.
         """
         if self.debug:
-            print("You are using deprecated method run(). You should use connect()")
+            self.logger.warning("You are using deprecated method run(). You should use connect()")
         self.connect()
