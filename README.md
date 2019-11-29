@@ -13,7 +13,7 @@
 |State|`Stable`|
 
 # VERSION 4
-Version 4 changed the protocol to socketIO - Therefore it only works with **Dynamic Davinci** 
+Version 4 changed the protocol to [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** 
 
 *An old version of the Node is still available in btNodeV3*
 
