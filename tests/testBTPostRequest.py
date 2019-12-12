@@ -25,5 +25,3 @@ class TestBTPostRequest(unittest.TestCase):
         # r.send() # TODO: For this a pong / testing instance (which is always available) is needed
         # can only return if the callback was executed
 
-if __name__ == '__main__':
-    unittest.main()

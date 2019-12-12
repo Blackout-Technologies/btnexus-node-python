@@ -27,6 +27,4 @@ class TestNode(unittest.TestCase):
         # node = Node(token='token', axonURL='axon', debug='debug')
         # node.connect()
 
-if __name__ == '__main__':
-    unittest.main()
             

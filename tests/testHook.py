@@ -25,6 +25,3 @@ class TestHook(unittest.TestCase):
         # h = ExampleHook()
         pass # TODO: For this a pong / testing instance (which is always available) is needed + .btnexusrc
 
-
-if __name__ == '__main__':
-    unittest.main()
