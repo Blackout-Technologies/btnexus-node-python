@@ -24,6 +24,9 @@ class TestNode(unittest.TestCase):
         Test the connect process of the Node
         '''
         pass # TODO: For this a pong / testing instance (which is always available) is needed
+        # node = Node(token='token', axonURL='axon', debug='debug')
+        # node.connect()
+
 if __name__ == '__main__':
     unittest.main()
             
