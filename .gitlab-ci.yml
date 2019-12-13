@@ -41,7 +41,7 @@ docu_staging:
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
-    DOCUBUILDFOLDER: $CI_PROJECT_TITLE_$CI_COMMIT_REF_NAME
+    DOCUBUILDFOLDER: $CI_PROJECT_TITLE"_"$CI_COMMIT_REF_NAME
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
     - echo "Start of the DocuPipeline"
@@ -54,7 +54,7 @@ docu_staging:
     - ls $DOCUBUILDFOLDER
     - echo $DOCUFOLDER    
     - ls $DOCUFOLDER
-    - cp $DOCUBUILDFOLDER $DOCUFOLDER
+    - cp -r $DOCUBUILDFOLDER $DOCUFOLDER
     # TODO: cd into Blackout-Technologies.github.io
     - cd $DOCUFOLDER
     # TODO: git add -a
