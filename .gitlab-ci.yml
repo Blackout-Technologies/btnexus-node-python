@@ -49,8 +49,19 @@ docu_staging:
     - git config --global user.name "The Docs Guy"
     - git clone $DOCUREPO
     # TODO: make the docu
+    # TODO: install sphinx and the module!
+    - pip install sphinx
+    - pip install .
+    # TODO: sphinx-apidoc -efM --ext-autodoc -o doc/ .
+    # TODO: maybe check if the doc folder exist otherwise create it. - consider using the --full option from shpinx-apidoc which setsup everything
+    # TODO: because packageName has '-' in it the package cant be loaded as it is. Need to replace all emtions of 'btnexus-node-python.'
+    - sphinx-apidoc -efFMa  -o doc/ . tests nexus examples setup.py
+    - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
+    - cd doc
+    - make html
     - mkdir $DOCUBUILDFOLDER
-    - echo "Hello World" > $DOCUBUILDFOLDER/index.html
+    # - echo "Hello World" > $DOCUBUILDFOLDER/index.html
+    - cp -r _build/html/* $DOCUBUILDFOLDER
     # TODO: copy docu into Blackout-Technologies.github.io
     - echo $DOCUBUILDFOLDER
     - ls $DOCUBUILDFOLDER
