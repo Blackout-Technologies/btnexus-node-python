@@ -34,7 +34,7 @@ stages:
 
 docu_staging:
   # TODO: An image that can build the docu and has git
-  image: alpine/git
+  image: ellerbrock/alpine-bash-git
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
