@@ -50,6 +50,10 @@ docu_staging:
     - mkdir $DOCUBUILDFOLDER
     - echo "Hello World" > $DOCUBUILDFOLDER/index.html
     # TODO: copy docu into Blackout-Technologies.github.io
+    - echo $DOCUBUILDFOLDER
+    - ls $DOCUBUILDFOLDER
+    - echo $DOCUFOLDER    
+    - ls $DOCUFOLDER
     - cp $DOCUBUILDFOLDER $DOCUFOLDER
     # TODO: cd into Blackout-Technologies.github.io
     - cd $DOCUFOLDER
