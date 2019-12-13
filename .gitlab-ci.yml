@@ -45,7 +45,7 @@ docu_staging:
     DOCUBUILDFOLDER: $CI_PROJECT_TITLE$_STR$CI_COMMIT_REF_NAME
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - apt install git-all
+    - apk install git-all
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
     - git clone $DOCUREPO
