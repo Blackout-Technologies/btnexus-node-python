@@ -1,4 +1,4 @@
-image: python:3.6-alpine
+
 
 stages:
   - build
@@ -8,11 +8,13 @@ stages:
 
 # TODO: uncomment after tests
 # build_package:
+  # image: python:3.6-alpine
 #   stage: build
 #   script:
 #     - pip install .
 
 # run_tests:
+  # image: python:3.6-alpine
 #   stage: test
 #   script:
 #     - pip install .
@@ -20,6 +22,7 @@ stages:
 #     #- python -m unittest discover -s .
 
 # deploy_staging:
+  # image: python:3.6-alpine
 #   stage: deploy
 #   variables:
 #     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
@@ -34,7 +37,7 @@ stages:
 
 docu_staging:
   # TODO: An image that can build the docu and has git
-  image: ellerbrock/alpine-bash-git
+  # image: ellerbrock/alpine-bash-git
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
@@ -60,6 +63,7 @@ docu_staging:
     - develop
 
 deploy_production:
+  image: python:3.6-alpine
   stage: deploy
   variables:
     TWINE_USERNAME: $PRODUCTION_USERNAME
