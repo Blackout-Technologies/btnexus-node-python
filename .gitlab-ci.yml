@@ -57,8 +57,8 @@ docu_staging:
     # TODO: maybe check if the doc folder exist otherwise create it. - consider using the --full option from shpinx-apidoc which setsup everything
     # TODO: because packageName has '-' in it the package cant be loaded as it is. Need to replace all emtions of 'btnexus-node-python.'
     - sphinx-apidoc -efFMa  -o doc/ . tests nexus examples setup.py
-    - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - cd doc
+    - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
     - mkdir $DOCUBUILDFOLDER
     # - echo "Hello World" > $DOCUBUILDFOLDER/index.html
