@@ -4,6 +4,7 @@ stages:
   - build
   - test
   - deploy
+  - docu
 
 build_package:
   stage: build
@@ -26,6 +27,31 @@ deploy_staging:
     - pip install twine==2.0
     - python setup.py sdist
     - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+  only:
+    - develop
+
+
+docu_staging:
+  stage: docu
+  variables:
+    DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
+    DOCUBUILDFOLDER: $CI_PROJECT_TITLE_$CI_COMMIT_REF_NAME
+    DOCUFOLDER: Blackout-Technologies.github.io
+  script:
+    - git clone $DOCUREPO
+    # TODO: make the docu
+    - mkdir $DOCUBUILDFOLDER
+    - echo "Hello World" > $DOCUBUILDFOLDER/index.html
+    # TODO: copy docu into Blackout-Technologies.github.io
+    - cp $DOCUBUILDFOLDER $DOCUFOLDER
+    # TODO: cd into Blackout-Technologies.github.io
+    - cd $DOCUFOLDER
+    # TODO: git add -a
+    - git add -A
+    # TODO: git commit
+    - git commit -m $CI_COMMIT_MESSAGE
+    # TODO: git push
+    - git push $DOCUREPO
   only:
     - develop
 
