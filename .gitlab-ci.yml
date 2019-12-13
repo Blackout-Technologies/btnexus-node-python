@@ -67,10 +67,10 @@ docu_staging:
     - echo $DOCUBUILDFOLDER
     - ls $DOCUBUILDFOLDER
     - echo $DOCUFOLDER    
-    - ls $DOCUFOLDER
-    - cp -r $DOCUBUILDFOLDER $DOCUFOLDER
+    - ls ../$DOCUFOLDER
+    - cp -r $DOCUBUILDFOLDER ../$DOCUFOLDER
     # TODO: cd into Blackout-Technologies.github.io
-    - cd $DOCUFOLDER
+    - cd ../$DOCUFOLDER
     # TODO: git add -a
     - git add -A
     # TODO: git commit
