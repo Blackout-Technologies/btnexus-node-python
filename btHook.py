@@ -38,11 +38,9 @@ class Hook(Node):
         with open(configpath) as jsonFile:
             self.version = json.load(jsonFile)["version"]
 
-        try:
-            with open(captionsPath) as jsonFile:
-                self.captions = json.load(jsonFile)
-        except:
-            print("Couldn't load captions")
+        with open(captionsPath) as jsonFile:
+            self.captions = json.load(jsonFile)
+
 
         #get connectHash
         self.initKwargs = kwargs
