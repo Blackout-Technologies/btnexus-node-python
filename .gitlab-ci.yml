@@ -6,38 +6,32 @@ stages:
   - deploy
   - docu
 
-# TODO: uncomment after tests
-# build_package:
-  # image: python:3.6-alpine
-#   stage: build
-#   script:
-#     - pip install .
+build_package:
+  stage: build
+  script:
+    - pip install .
 
-# run_tests:
-  # image: python:3.6-alpine
-#   stage: test
-#   script:
-#     - pip install .
-#     - cd tests
-#     #- python -m unittest discover -s .
+run_tests:
+  stage: test
+  script:
+    - pip install .
+    - cd tests
+    #- python -m unittest discover -s .
 
-# deploy_staging:
-  # image: python:3.6-alpine
-#   stage: deploy
-#   variables:
-#     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
-#     TWINE_PASSWORD: $STAGING_PASSWORD
-#   script:
-#     - pip install twine==2.0
-#     - python setup.py sdist
-#     - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-#   only:
-#     - develop
+deploy_staging:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
+    TWINE_PASSWORD: $STAGING_PASSWORD
+  script:
+    - pip install twine==2.0
+    - python setup.py sdist
+    - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+  only:
+    - develop
 
 
 docu_staging:
-  # TODO: An image that can build the docu and has git
-  # image: ellerbrock/alpine-bash-git
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
@@ -49,39 +43,30 @@ docu_staging:
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
     - git clone $DOCUREPO
-    # TODO: make the docu
-    # TODO: install sphinx and the module!
+    # install sphinx and the module!
     - pip install sphinx
     - pip install .
-    # TODO: sphinx-apidoc -efM --ext-autodoc -o doc/ .
-    # TODO: maybe check if the doc folder exist otherwise create it. - consider using the --full option from shpinx-apidoc which setsup everything
-    # TODO: because packageName has '-' in it the package cant be loaded as it is. Need to replace all emtions of 'btnexus-node-python.'
     - sphinx-apidoc -efFMa  -o doc/ . tests nexus examples setup.py
     - cd doc
     - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
     - mkdir $DOCUBUILDFOLDER
-    # - echo "Hello World" > $DOCUBUILDFOLDER/index.html
     - cp -r _build/html/* $DOCUBUILDFOLDER
-    # TODO: copy docu into Blackout-Technologies.github.io
+    # copy docu into Blackout-Technologies.github.io
     - echo $DOCUBUILDFOLDER
     - ls $DOCUBUILDFOLDER
     - echo $DOCUFOLDER    
     - ls ../$DOCUFOLDER
     - cp -r $DOCUBUILDFOLDER ../$DOCUFOLDER
-    # TODO: cd into Blackout-Technologies.github.io
+    # cd into Blackout-Technologies.github.io
     - cd ../$DOCUFOLDER
-    # TODO: git add -a
     - git add -A
-    # TODO: git commit
     - git commit -m "$CI_COMMIT_MESSAGE"
-    # TODO: git push
     - git push $DOCUREPO
   only:
     - develop
 
 deploy_production:
-  image: python:3.6-alpine
   stage: deploy
   variables:
     TWINE_USERNAME: $PRODUCTION_USERNAME
