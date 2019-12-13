@@ -41,7 +41,8 @@ docu_staging:
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
-    DOCUBUILDFOLDER: $CI_PROJECT_TITLE"_"$CI_COMMIT_REF_NAME
+    _STR: _
+    DOCUBUILDFOLDER: $CI_PROJECT_TITLE$_STR$CI_COMMIT_REF_NAME
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
     - echo "Start of the DocuPipeline"
@@ -60,7 +61,7 @@ docu_staging:
     # TODO: git add -a
     - git add -A
     # TODO: git commit
-    - git commit -m $CI_COMMIT_MESSAGE
+    - git commit -m "$CI_COMMIT_MESSAGE"
     # TODO: git push
     - git push $DOCUREPO
   only:
