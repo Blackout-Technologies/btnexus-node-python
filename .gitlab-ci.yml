@@ -6,19 +6,19 @@ stages:
   - deploy
   - docu
 
-build_package:
-  stage: build
-  script:
-    - pip install .
-
-run_tests:
-  stage: test
-  script:
-    - pip install .
-    - cd tests
-    #- python -m unittest discover -s .
-
 # TODO: uncomment after tests
+# build_package:
+#   stage: build
+#   script:
+#     - pip install .
+
+# run_tests:
+#   stage: test
+#   script:
+#     - pip install .
+#     - cd tests
+#     #- python -m unittest discover -s .
+
 # deploy_staging:
 #   stage: deploy
 #   variables:
@@ -41,6 +41,7 @@ docu_staging:
     DOCUBUILDFOLDER: $CI_PROJECT_TITLE_$CI_COMMIT_REF_NAME
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
+    - echo "Start of the DocuPipeline"
     - git clone $DOCUREPO
     # TODO: make the docu
     - mkdir $DOCUBUILDFOLDER
