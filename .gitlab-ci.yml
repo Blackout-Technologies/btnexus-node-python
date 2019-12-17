@@ -57,13 +57,14 @@ docu_staging:
     - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
     - mkdir -p $DOCUBUILDFOLDER
+    - ls -ah
     - cp -r _build/html/* $DOCUBUILDFOLDER
     # copy docu into Blackout-Technologies.github.io
     - echo $DOCUBUILDFOLDER
     - ls $DOCUBUILDFOLDER
     - echo $DOCUFOLDER    
     - ls ../$DOCUFOLDER
-    - cp -r $DOCUBUILDFOLDER ../$DOCUFOLDER
+    - cp -r $DOCUBUILDFOLDER ../$DOCUFOLDER/$CI_PROJECT_TITLE
     # cd into Blackout-Technologies.github.io
     - cd ../$DOCUFOLDER
     - git add -A
