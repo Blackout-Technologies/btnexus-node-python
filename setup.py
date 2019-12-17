@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import pathlib
+import os
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -8,6 +9,11 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 VERSION = (HERE / "VERSION").read_text()
+try:
+    VERSION += '.{}'.format(os.environ["CI_BUILD_ID"])
+except:
+    print('LOCAL BUILD')
+
 
 
 setup(name='btnexus-node-python',

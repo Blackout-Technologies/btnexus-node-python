@@ -1,9 +1,9 @@
 image: python:3.6-alpine
 
 stages:
-  - test  
+  - test
+  - docu  
   - deploy
-  - docu
 
 run_tests:
   stage: test
@@ -19,7 +19,7 @@ deploy_staging:
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - export VERSION=$(cat VERSION)
+    - export VERSION=$(cat VERSION).$CI_BUILD_ID
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
     - python setup.py sdist
@@ -34,7 +34,7 @@ deploy_production:
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - export VERSION=$(cat VERSION)
+    - export VERSION=$(cat VERSION).$CI_BUILD_ID
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
     - python setup.py sdist
@@ -48,7 +48,7 @@ docu_staging:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - export VERSION=$(cat VERSION)
+    - export VERSION=$(cat VERSION).$CI_BUILD_ID
     - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git tree
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
