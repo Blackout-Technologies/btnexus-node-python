@@ -1,9 +1,9 @@
 image: python:3.6-alpine
 
 stages:
-  - test
-  - docu  
+  - test  
   - deploy
+  - docu
 
 run_tests:
   stage: test
