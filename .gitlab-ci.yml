@@ -40,7 +40,7 @@ docu_staging:
   script:
     - export VERSION=$(cat VERSION)
     - export DOCUBUILDFOLDER=$CI_PROJECT_TITLE$/$VERSION
-    - echo DOCUBUILDFOLDER
+    - echo $DOCUBUILDFOLDER
     - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git tree
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
