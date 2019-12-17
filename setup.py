@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 
 VERSION = (HERE / "VERSION").read_text()
 try:
-    VERSION += '.{}'.format(os.environ["CI_BUILD_ID"])
+    VERSION += '.{}'.format(os.environ["CI_PIPELINE_ID"])
 except:
     print('LOCAL BUILD')
 
