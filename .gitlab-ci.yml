@@ -36,12 +36,11 @@ docu_staging:
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
-    _STR: _
-    VERSION: $(cat VERSION)     # get VERSION from VERSION file for production
-    DOCUBUILDFOLDER: $CI_PROJECT_TITLE$/$VERSION #$CI_PROJECT_TITLE/$VERSION 
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - echo $VERSION
+    - export VERSION=$(cat VERSION)
+    - export DOCUBUILDFOLDER=$CI_PROJECT_TITLE$/$VERSION
+    - echo DOCUBUILDFOLDER
     - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git tree
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
