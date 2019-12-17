@@ -24,6 +24,7 @@ stages:
 #     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
 #     TWINE_PASSWORD: $STAGING_PASSWORD
 #   script:
+  # TODO: replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
 #     - pip install twine==2.0
 #     - python setup.py sdist
 #     - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
@@ -36,7 +37,8 @@ docu_staging:
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     _STR: _
-    DOCUBUILDFOLDER: $CI_PROJECT_TITLE$_STR$CI_COMMIT_REF_NAME
+    VERSION: DEV     # TODO: get VERSION from VERSION file for production
+    DOCUBUILDFOLDER: $CI_PROJECT_TITLE$/$VERSION #$CI_PROJECT_TITLE/$VERSION 
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
     - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git
@@ -51,10 +53,10 @@ docu_staging:
     - rm -rf _doc
     - sphinx-apidoc -efFMa -H btnexus-node-python -A "Blackout Technologies" -t doc/ -o _doc/ . tests nexus examples setup.py
     - cd _doc
-    # removing 'btnexus-node-python' because it is compatible for import
+    # removing 'btnexus-node-python' because it is not compatible for import
     - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
-    - mkdir $DOCUBUILDFOLDER
+    - mkdir -p $DOCUBUILDFOLDER
     - cp -r _build/html/* $DOCUBUILDFOLDER
     # copy docu into Blackout-Technologies.github.io
     - echo $DOCUBUILDFOLDER

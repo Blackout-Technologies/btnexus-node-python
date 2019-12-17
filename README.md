@@ -12,10 +12,28 @@
 |Runs on|Python 3.6+|
 |State|`Stable`|
 
+# Prerequisites
+
+* Python installed (either 2.7+ or Python 3)
+* Owner of a btNexus instance or a btNexus account
+
+# Install btnexus-node-python
+```
+pip install btnexus-node-python
+```
+If you need to install a specific version use
+```
+pip install btnexus-node-python==[VERSION]
+```
+
+# API Documentation
+You find an API Documentation our [GitHub Page](https://blackout-technologies.github.io/btnexus-node-python)
+
 # VERSION 4
 Version 4 changed the protocol to [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** 
 
 *An old version of the Node is still available in btNodeV3*
+<!-- TODO: remove that statement - shouldnt be the case -->
 
 # Known Issues
 Since Version 3.1 Node automatically reconnect on an Error. That means any occurring error causes a reconnect. **KeyboardInterupt is an Error. If you want to terminate your script use `ctrl + Alt Gr + \`**
@@ -46,41 +64,8 @@ Every `Callback` returns a `Message` to the `btNexus` with the name of the origi
 `Topics` and `Groups` help to organize `Messages`. A `Callback` can only be mapped to one `Group` and  `Topic`.
 
 
-# Prerequisites
 
-* Python installed (either 2.7+ or Python 3)
-* Owner of a btNexus instance or a btNexus account
 
-# Install btnexus-node-python
-## easiest solution
-With pip you can install the repository directly.
-We recommend using Anaconda (https://www.anaconda.com/), because you wont need `sudo` and you can simply use virtual environments.
-If you are using Anaconda or any other virtual environments(**recommended**) or your systems pip(**not recommended**) you can simply
-```
-pip install git+https://github.com/Blackout-Technologies/btnexus-node-python
-```
-*to install a specific version add @version*
-
-## workaround
-If you don't use an environment and cannot use the system pip(no sudo) just add the `--user` option:
-
-```
-pip install --user git+https://github.com/Blackout-Technologies/btnexus-node-python
-```
-
-If you cannot use pip for any reason, do the following:
-
-Install the Python modules with
-```
-sudo easy_install .
-```
-
-If you are not `sudo` and have no pip use the install.sh to install the modules to your home directory
-```
-./install.sh
-```
-
-If you can not use pip you also have to install six and pyyaml manually.
 
 # Example Nodes
 Following you will see an example of a Node which sends out the current minute

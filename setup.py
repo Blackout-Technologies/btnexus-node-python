@@ -7,9 +7,11 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
+VERSION = (HERE / "VERSION").read_text()
+
 
 setup(name='btnexus-node-python',
-    version='4.0.0',
+    version=VERSION,
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
