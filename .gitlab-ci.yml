@@ -41,7 +41,7 @@ docu_staging:
     DOCUBUILDFOLDER: $CI_PROJECT_TITLE$/$VERSION #$CI_PROJECT_TITLE/$VERSION 
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git
+    - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git tree
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
     - git clone $DOCUREPO
@@ -60,6 +60,8 @@ docu_staging:
     # copy docu into Blackout-Technologies.github.io
     - mkdir -p $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
     - cp -r _doc/_build/html/* $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
+    - cd $DOCUFOLDER/$CI_PROJECT_TITLE
+    - tree -H '.' -L 1 --noreport --charset utf-8 > index.html
     # cd into Blackout-Technologies.github.io
     - cd $DOCUFOLDER
     - git add -A
