@@ -62,6 +62,7 @@ docu_staging:
     - cp -r _doc/_build/html/* $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
     - cd $DOCUFOLDER/$CI_PROJECT_TITLE
     - tree -H '.' -L 1 --noreport --charset utf-8 > index.html
+    - touch .nojekyll
     - cd -
     # cd into Blackout-Technologies.github.io
     - cd $DOCUFOLDER
