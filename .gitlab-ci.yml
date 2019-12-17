@@ -53,6 +53,7 @@ docu_staging:
     - rm -rf _doc
     - sphinx-apidoc -efFMa -H btnexus-node-python -A "Blackout Technologies" -t doc/ -o _doc/ . tests nexus examples setup.py
     - cd _doc
+    - ls -ah
     # removing 'btnexus-node-python' because it is not compatible for import
     - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
