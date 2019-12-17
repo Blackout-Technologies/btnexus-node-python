@@ -52,21 +52,16 @@ docu_staging:
     # remove the folder before to make sure to get rid of fragments
     - rm -rf _doc
     - sphinx-apidoc -efFMa -H btnexus-node-python -A "Blackout Technologies" -t doc/ -o _doc/ . tests nexus examples setup.py
-    - cd _doc
+    - pushd _doc
     # removing 'btnexus-node-python' because it is not compatible for import
     - sed -i 's/btnexus-node-python.//g' btnexus-node-python.bt*
     - make html
-    - mkdir -p $DOCUBUILDFOLDER
-    - ls -ah
-    - cp -r _build/html/* $DOCUBUILDFOLDER
+    - popd
     # copy docu into Blackout-Technologies.github.io
-    - echo $DOCUBUILDFOLDER
-    - ls $DOCUBUILDFOLDER
-    - echo $DOCUFOLDER    
-    - ls ../$DOCUFOLDER
-    - cp -r $DOCUBUILDFOLDER ../$DOCUFOLDER/$CI_PROJECT_TITLE
+    - mkdir -p $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
+    - cp -r _doc/_build/html/* $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
     # cd into Blackout-Technologies.github.io
-    - cd ../$DOCUFOLDER
+    - pushd $DOCUFOLDER
     - git add -A
     - git commit -m "$CI_COMMIT_MESSAGE"
     - git push $DOCUREPO
