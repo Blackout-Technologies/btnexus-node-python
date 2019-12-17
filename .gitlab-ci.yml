@@ -1,22 +1,16 @@
 image: python:3.6-alpine
 
 stages:
-  - build
   - test
+  - docu  
   - deploy
-  - docu
 
-# build_package:
-#   stage: build
-#   script:
-#     - pip install .
-
-# run_tests:
-#   stage: test
-#   script:
-#     - pip install .
-#     - cd tests
-#     #- python -m unittest discover -s .
+run_tests:
+  stage: test
+  script:
+    - pip install .
+    - cd tests
+    - python -m unittest discover -s .
 
 deploy_staging:
   stage: deploy
@@ -24,7 +18,7 @@ deploy_staging:
     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
-  # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
+    # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
     - export VERSION=$(cat VERSION)
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
@@ -33,6 +27,20 @@ deploy_staging:
   only:
     - develop
 
+deploy_production:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PRODUCTION_USERNAME
+    TWINE_PASSWORD: $PRODUCTION_PASSWORD
+  script:
+    # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
+    - export VERSION=$(cat VERSION)
+    - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
+    - pip install twine==2.0
+    - python setup.py sdist
+    - twine upload --verbose dist/*
+  only:
+    - master    
 
 docu_staging:
   stage: docu
@@ -71,15 +79,5 @@ docu_staging:
     - git push $DOCUREPO
   only:
     - develop
+    - master
 
-# deploy_production:
-#   stage: deploy
-#   variables:
-#     TWINE_USERNAME: $PRODUCTION_USERNAME
-#     TWINE_PASSWORD: $PRODUCTION_PASSWORD
-#   script:
-#     - pip install twine==2.0
-#     - python setup.py sdist
-#     - twine upload --verbose dist/*
-#   only:
-#     - master
