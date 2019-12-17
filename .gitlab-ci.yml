@@ -37,7 +37,7 @@ docu_staging:
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     _STR: _
-    VERSION: DEV2     # TODO: get VERSION from VERSION file for production
+    VERSION: $(cat VERSION)     # get VERSION from VERSION file for production
     DOCUBUILDFOLDER: $CI_PROJECT_TITLE$/$VERSION #$CI_PROJECT_TITLE/$VERSION 
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
