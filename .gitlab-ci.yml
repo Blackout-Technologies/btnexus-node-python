@@ -37,7 +37,7 @@ docu_staging:
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     _STR: _
-    VERSION: DEV     # TODO: get VERSION from VERSION file for production
+    VERSION: DEV2     # TODO: get VERSION from VERSION file for production
     DOCUBUILDFOLDER: $CI_PROJECT_TITLE$/$VERSION #$CI_PROJECT_TITLE/$VERSION 
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
@@ -61,7 +61,7 @@ docu_staging:
     - mkdir -p $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
     - cp -r _doc/_build/html/* $DOCUFOLDER/$CI_PROJECT_TITLE/$VERSION
     - cd $DOCUFOLDER/$CI_PROJECT_TITLE
-    - tree -d -H '.' -L 1 --noreport --charset utf-8 > index.html
+    - tree -d -H '.' -T 'VERSIONS' -L 1 --noreport --charset utf-8 > index.html
     - touch .nojekyll
     - cd -
     # cd into Blackout-Technologies.github.io
