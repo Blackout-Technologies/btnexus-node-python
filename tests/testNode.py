@@ -23,8 +23,10 @@ class TestNode(unittest.TestCase):
         '''
         Test the connect process of the Node
         '''
+        # TODO: read token from gitlab variables! and axonURL
+        node = Node(token='', axonURL='dev5.btnexus.ai', debug=True)
+        Thread(target=node.connect).start()
+        # TODO: assert a certain callback will be called within x seconds, because connect() is blocking
         pass # TODO: For this a pong / testing instance (which is always available) is needed
-        # node = Node(token='token', axonURL='axon', debug='debug')
-        # node.connect()
 
             
