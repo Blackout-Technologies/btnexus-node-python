@@ -23,6 +23,7 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 class Node(object):
     """Blackout Nexus node"""
     NEXUSINFO = 21
+    # TODO: can I add a docstring here? - http://epydoc.sourceforge.net/manual-docstring.html#variable-docstrings
 
     @classmethod
     def nexusFormat(cls, record):
@@ -206,7 +207,7 @@ class Node(object):
         If not implemented the Node tries to reconnect
         """
         self.cleanUp()
-        self.setUp()
+        self.setUp() # This does not make too much sense but the most because we assume that we try to reconnect.
 
     def setUp(self):
         """
@@ -226,7 +227,7 @@ class Node(object):
         This is a blocking call
         """
         self.ping_interval = ping_interval
-        self.setUp()
+        self.setUp() 
         self.nexusConnector.listen(ping_interval=ping_interval)
 
     def run(self):

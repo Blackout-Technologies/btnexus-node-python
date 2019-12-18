@@ -62,7 +62,11 @@ class SendingNode(Node):
         """
         super(SendingNode, self).cleanUp()
         self.shouldRun = False
-        self.thread.join() #This crashes, when onConnected was never called before - add try/except Block
+        try:
+            self.thread.join()
+        except AttributeError:
+            pass # This only happens if onConnected was never called before - Node was never connected correctly and therefore closes the connection and calls the cleanUp
+
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.

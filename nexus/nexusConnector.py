@@ -59,7 +59,7 @@ class NexusConnector():
         self.parent = parent
         self.parentName = self.parent.nodeName
         self.nodeId = None #str(uuid.uuid4())
-        self.protocol = "ws" # TODO: needs to be changed back to wss at some point!
+        self.protocol = "wss" 
         self.token = token
         self.axon = axonURL
         self.debug = debug
@@ -174,8 +174,6 @@ class NexusConnector():
         leave["groupName"] = group
         self.publish(leave)
 
-
-
     def subscribe(self, group, topic, callback, funcName = None):
         """
         Subscribe to a group & topic with a callback
@@ -272,8 +270,6 @@ class NexusConnector():
         err["payload"] = {"error":error}
         self.publish(err)
 
-
-
     def onMessage(self, message):
         """
         React on a incoming Message and decide what to do.
@@ -315,7 +311,6 @@ class NexusConnector():
                 except Exception:
                     self.publishError(traceback.format_exc())
 
-
     def defineCallbacks(self):
         @self.sio.event
         def connect():
@@ -340,14 +335,20 @@ class NexusConnector():
 
         @self.sio.event
         def connect_error():
-            self.logger.log(self.parent.NEXUSINFO, "[Nexus]: The connection failed!")
+            self.logger.log(self.parent.NEXUSINFO, "The connection failed!")
 
         @self.sio.event
         def disconnect():
+            self.callbacks = defaultdict(lambda: defaultdict(dict))
             self.isConnected = False
-            self.logger.log(self.parent.NEXUSINFO, "[Nexus]: Connection closed")
+            self.logger.log(self.parent.NEXUSINFO, "Connection closed")
             self.parent.onDisconnected()
         
+        # @self.sio.event
+        # def reconnect():
+        #     pass
+
+
         @self.sio.on('pong')
         def onPong(data):
             self.logger.info('[PONG]{}'.format(data))
