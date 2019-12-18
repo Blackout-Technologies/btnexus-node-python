@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import pathlib
+import os
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -7,9 +8,16 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
+VERSION = (HERE / "VERSION").read_text()
+try:
+    VERSION += '.{}'.format(os.environ["CI_PIPELINE_IID"])
+except:
+    print('LOCAL BUILD')
+
+
 
 setup(name='btnexus-node-python',
-    version='4.0.0',
+    version=VERSION,
     description="Provides Node, Hook and PostRequests that follow the btProtocol.",
     long_description=README,
     long_description_content_type="text/markdown",
