@@ -1,6 +1,9 @@
 '''Tests for the Node'''
 # System imports
 import unittest
+import time
+from threading import Thread
+import os
 
 # 3rd Party imports
 from btNode import Node
@@ -9,24 +12,21 @@ from btNode import Node
 __author__      = 'Adrian Lubitz'
 __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
-class TestNode(unittest.TestCase):
-    '''Tests for the Node'''
 
-    def test_init(self):
-        '''
-        Test init of the Node
-        The params make no sense - the test is only checking if the init of a Node is possible
-        '''
-        node = Node(token='token', axonURL='axon', debug='debug')
+class TestNode(Node):
+    def onConnected(self):
+        self.disconnect() #connecting was successfull - disconnect
+
+
+class NodeTests(unittest.TestCase):
+    '''Tests for the Node''' 
 
     def test_connect(self):
         '''
         Test the connect process of the Node
         '''
-        # TODO: read token from gitlab variables! and axonURL
-        node = Node(token='', axonURL='dev5.btnexus.ai', debug=True)
-        Thread(target=node.connect).start()
-        # TODO: assert a certain callback will be called within x seconds, because connect() is blocking
-        pass # TODO: For this a pong / testing instance (which is always available) is needed
-
-            
+        # read token from gitlab variables! and axonURL
+        node = TestNode(token=os.environ['TOKEN'], axonURL=os.environ['AXON_HOST'], debug=False)
+        node.connect(reconnection=False)
+        assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
+        assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'

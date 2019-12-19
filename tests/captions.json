@@ -1,0 +1,35 @@
+{
+    "settings":{
+        "letUserExtendCaptions": true
+    },
+    "en-US": {
+        "sayHi": "Hello world from your new btNexus Hook!"
+    },
+    "de-DE": {
+        "sayHi": "Hallo Welt von meinem neuen btNexus Hook!"
+    },
+    "en-GB": {
+        "sayHi": "Hello world from your new btNexus Hook!"
+    },
+    "pt-BR": {
+        "sayHi": "Olá mundo do seu novo gancho btNexus!"
+    },
+    "nl-NL": {
+        "sayHi": "Hallo wereld van je nieuwe btNexus Hook!"
+    },
+    "fr-FR": {
+        "sayHi": "Bonjour tout le monde de votre nouveau crochet btNexus!"
+    },
+    "it-IT": {
+        "sayHi": "Ciao mondo dal tuo nuovo btNexus Hook!"
+    },
+    "es-MX": {
+        "sayHi": "Hola mundo desde tu nuevo btNexus Hook!"
+    },
+    "es-ES": {
+        "sayHi": "Hola mundo desde tu nuevo btNexus Hook!"
+    },
+    "ja-JP": {
+        "sayHi": "Anata no atarashī btNexus fukku kara kon'nichiwa sekai!"
+    }
+}

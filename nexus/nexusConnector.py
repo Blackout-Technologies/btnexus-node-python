@@ -142,15 +142,32 @@ class NexusConnector():
         """
         self.debug = mode
 
-    def listen(self, ping_interval=None):
+    def listen(self, **kwargs): # TODO: is it possible to use kwargs twice? - for init() and connect()?
         """Start listening on Websocket communication"""
         # SSLOPTS
         ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
-        self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger)
+        self.reconnect = kwargs['reconnection'] if 'reconnection' in kwargs else True
+        self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger, **kwargs)
         self.defineCallbacks()
+        _reconnect = True
+        while(_reconnect):
+            _reconnect = self.reconnect # Do While
+            try:
+                self.sio.connect(self.wsConf)
+                self.sio.wait()
+            except socketio.exceptions.ConnectionError as e:
+                if reconnect:
+                    self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
+                    time.sleep(5)
+                else:
+                    raise e
 
-        self.sio.connect(self.wsConf)
-        self.sio.wait()
+    def disconnect(self):
+        """
+        Closes the connection to the Axon
+        """
+        self.onDisconnected()
+        self.sio.disconnect()
 
     def join(self, group):
         """
@@ -311,6 +328,15 @@ class NexusConnector():
                 except Exception:
                     self.publishError(traceback.format_exc())
 
+    def onDisconnected(self):
+        self.callbacks = defaultdict(lambda: defaultdict(dict))
+        self.isConnected = False
+        self.isRegistered = False
+        self.logger.log(self.parent.NEXUSINFO, "Connection closed")
+        self.parent.onDisconnected()
+        if self.reconnect:
+            self.parent.setUp()
+
     def defineCallbacks(self):
         @self.sio.event
         def connect():
@@ -339,10 +365,7 @@ class NexusConnector():
 
         @self.sio.event
         def disconnect():
-            self.callbacks = defaultdict(lambda: defaultdict(dict))
-            self.isConnected = False
-            self.logger.log(self.parent.NEXUSINFO, "Connection closed")
-            self.parent.onDisconnected()
+            self.onDisconnected()
         
         # @self.sio.event
         # def reconnect():

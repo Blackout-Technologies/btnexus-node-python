@@ -22,6 +22,6 @@ class TestHook(unittest.TestCase):
         '''
         test to initialize a Hook
         '''
-        # h = ExampleHook()
-        pass # TODO: For this a pong / testing instance (which is always available) is needed + .btnexusrc
+        h = ExampleHook()
+        pass # TODO: disconnect
 

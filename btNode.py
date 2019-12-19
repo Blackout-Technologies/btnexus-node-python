@@ -203,32 +203,35 @@ class Node(object):
 
     def onDisconnected(self):
         """
-        This will be executed after a the Node is disconnected from the btNexus
-        If not implemented the Node tries to reconnect
+        This will be executed after a the Node is disconnected from the btNexus - here Threads can be closed or other variables can be reset.
         """
-        self.cleanUp()
-        self.setUp() # This does not make too much sense but the most because we assume that we try to reconnect.
+        self.logger.log(self.NEXUSINFO, "[{}]: onDisconnected".format(self.nodeName))
 
     def setUp(self):
         """
-        Implement this to handle the things, which should be done before the connection to nexus is established.
+        Implement this to handle the things, which should be done before the connection to nexus is established. This will also be called for reconnects.
         """
-        self.logger.info("[{}]: setUp".format(self.nodeName))
+        self.logger.log(self.NEXUSINFO,"[{}]: setUp".format(self.nodeName))
 
-    def cleanUp(self):
-        """
-        Implement this to handle the things, which should be done when you disconnect the node.
-        """
-        self.logger.info("[{}]: cleanUp".format(self.nodeName))
+    # def cleanUp(self):
+    #     """
+    #     Implement this to handle the things, which should be done when you disconnect the node.
+    #     """
+    #     self.logger.info("[{}]: cleanUp".format(self.nodeName))
 
-    def connect(self, ping_interval=60):
+    def connect(self, **kwargs): 
         """
         Runs this node and listen forever
         This is a blocking call
         """
-        self.ping_interval = ping_interval
         self.setUp() 
-        self.nexusConnector.listen(ping_interval=ping_interval)
+        self.nexusConnector.listen(**kwargs)
+
+    def disconnect(self):
+        """
+        Closes the connection to the Axon
+        """
+        self.nexusConnector.disconnect()
 
     def run(self):
         """
