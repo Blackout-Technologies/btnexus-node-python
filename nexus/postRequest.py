@@ -17,7 +17,7 @@ class PostRequest():
     """
     A post request with a callback for the response
     """
-    def __init__(self, url, data, callback=None, headers=None):
+    def __init__(self, url, data, callback=None, errBack=None):
         """
         setting up the request.
 
@@ -25,37 +25,39 @@ class PostRequest():
         :type url: String
         :param data: the data which should be send
         :type data: dict
-        :param callback: the callback which handles the response
+        :param callback: the callback which handles the response. Takes one argument which is a json object
         :type callback: function pointer
+        :param errBack: callback to handle errors. takes one argument which is the exception
+        :type errBack: function pointer
         """
 
         self.url = url
         self.data = json.dumps(data)
         self.callback = callback
-        self.headers = headers
+        self.errBack = errBack
 
-    def _send(self):
+    def _send(self, **kwargs):
         """
         sending the request and trigger the callback when response is ready - this is blocking
         """
-        r = requests.post(self.url, data=self.data, headers=self.headers)
-        content =json.loads(r.content)
         try:
+            r = requests.post(self.url, data=self.data, **kwargs)
+            content =json.loads(r.content)
             r.raise_for_status()
+            if self.callback:
+                self.callback(r.json())
         except Exception as e:
-            print (content["error"])
-            raise (e)
-        if self.callback:
-            self.callback(r.json())
+            if self.errBack:
+                self.errBack(e)
 
-    def send(self, blocking=False):
+    def send(self, blocking=False, **kwargs):
         """
         sending the request in a thread(if blocking=False) and triggers the callback when response is ready
         """
-        if not blocking:
-            threading.Thread(target=self._send).start()
+        if not blocking:    
+            threading.Thread(target=self._send, kwargs=kwargs).start()
         else:
-            self._send()
+            self._send(**kwargs)
 
 
 if __name__ == "__main__":

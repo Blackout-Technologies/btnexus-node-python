@@ -16,7 +16,7 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
 class BTPostRequest(PostRequest):
     """A post request following the BTProtocol"""
-    def __init__(self, intent, params, accessToken, url, callback=None):
+    def __init__(self, intent, params, accessToken, url, callback=None, errBack=None):
         """
         setting up the request with the btProtocol.
 
@@ -30,6 +30,8 @@ class BTPostRequest(PostRequest):
         :type url: String
         :param callback: the callback which handles the response
         :type callback: function pointer
+        :param errBack: callback to handle errors. takes one argument which is the exception - This is needed for the threaded send() otherwise exceptions can't be handled
+        :type errBack: function pointer
         """
 
         # check if slash in the end
@@ -38,26 +40,16 @@ class BTPostRequest(PostRequest):
         url += "api"
         
         params['api'] = {'version':'5.0', 'intent':intent}
-        headers = {'content-type': 'application/json', 'blackout-token': accessToken}
-        super(BTPostRequest, self).__init__(url, params, callback, headers = headers)
+        self.headers = {'content-type': 'application/json', 'blackout-token': accessToken}
+        super(BTPostRequest, self).__init__(url, params, callback, errBack)
 
-if __name__ == '__main__':
-    import os
-    def printResponse(response):
-        print('Response: {}'.format(response))
-    token = os.environ["TOKEN"]
-    axon = os.environ["AXON_HOST"]
-    # print ("URL: {}".format(axon))
-    # print ("Token: {}".format(token))
-    personalityId = os.environ["PERSONALITYID"]
-    integrationId = "f0458d18-3108-11e9-b210-d663bd873d93" # TODO: This is the robot integrationId - this needs to be set correctly
-    params = {
-        'integrationId': integrationId,
-        'personalityId': personalityId
-    }
-    print('params: {}'.format(params))
-    print('Token: {}'.format(token))
-    print('url: {}'.format('https://' + axon))
+    def send(self, blocking=False, **kwargs):
+        """
+        sending the request and executing the callback or errBack
 
-    BTPostRequest('sessionAccessRequest', params, accessToken=token, url='https://' + axon, callback=printResponse).send()
+        :param blocking: decides if the call is blocking or threaded
+        :type blocking: Boolean
+        :param kwargs: keyword arguments for the requests.post call see https://2.python-requests.org//en/v2.5.3/api/ - `headers` cant be customized for a btPostRequest because it is already used internally
+        """
 
+        super().send(blocking=blocking, headers=self.headers, **kwargs)
