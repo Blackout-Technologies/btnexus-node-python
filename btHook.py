@@ -64,7 +64,7 @@ class Hook(Node):
         self.data = BTNexusData("https://" + self.host, self.token, self.config['id'])
         super(Hook, self).__init__(self.token, self.host)
         self.onInit(**kwargs)
-        self.connect()
+        self.connect(**kwargs)
 
 
     def onConnected(self):

@@ -26,7 +26,7 @@ class NodeTests(unittest.TestCase):
         Test the connect process of the Node
         '''
         # read token from gitlab variables! and axonURL
-        node = TestNode(token=os.environ['TOKEN'], axonURL=os.environ['AXON_HOST'], debug=False)
+        node = TestNode()
         node.connect(reconnection=False)
         assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
         assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
