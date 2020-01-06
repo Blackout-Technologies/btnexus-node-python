@@ -15,7 +15,7 @@ class ExampleHook(Hook):
     '''
     def onConnected(self):
         super().onConnected()
-        self.disconnect()
+        self.disconnect() # disconnects after successfully connecting
 
 class TestHook(unittest.TestCase):
     '''Tests for the Hook'''
@@ -25,5 +25,5 @@ class TestHook(unittest.TestCase):
         test to initialize a Hook
         '''
         h = ExampleHook(reconnection=False)
-        pass # TODO: disconnect
+        
 
