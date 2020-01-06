@@ -30,7 +30,7 @@ class BTPostRequest(PostRequest):
         :type url: String
         :param callback: the callback which handles the response
         :type callback: function pointer
-        :param errBack: callback to handle errors. takes one argument which is the exception - This is needed for the threaded send() otherwise exceptions can't be handled
+        :param errBack: callback to handle errors that prevent that the response can be handled by the callback. takes one argument which is the exception - This is needed for the threaded send() otherwise exceptions can't be handled
         :type errBack: function pointer
         """
 

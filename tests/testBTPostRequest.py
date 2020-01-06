@@ -33,6 +33,7 @@ class TestBTPostRequest(unittest.TestCase):
         """
         if response['success']:
             self.errorMsg = False 
+            print('RESPONSE: {}'.format(response))
         else:
             self.errorMsg = response['error']
         self.lock.release()
@@ -44,15 +45,12 @@ class TestBTPostRequest(unittest.TestCase):
         self.exception = exception
         self.lock.release()
 
-    def test_init(self):
-        '''
-        test to initialize a Hook
-        '''
-        r = BTPostRequest(intent='intent', params={}, accessToken='token', url='url')
+
     def test_threadedSendSessionAccessRequest(self):
         '''
         test to send and btPostrequest and receive a response in a threaded fashion.
         '''
+        print('TESTING THE threadedSendSessionAccessRequest')
         params = {
         'integrationId': self.integrationId,
         'personalityId': self.personalityId
@@ -70,12 +68,12 @@ class TestBTPostRequest(unittest.TestCase):
         '''
         test to send and btPostrequest and receive a response in a blocking fashion.
         '''
+        print('TESTING THE blockingSendSessionAccessRequest')
         params = {
         'integrationId': self.integrationId,
         'personalityId': self.personalityId
         }
-        self.lock.acquire() # only to reuse the callback method
-        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url='https://' + self.axon, callback=self.callback).send(blocking=True, timeout=2)
+        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url='https://' + self.axon, callback=print).send(blocking=True, timeout=2)
 
 if __name__ == "__main__":
     unittest.main()

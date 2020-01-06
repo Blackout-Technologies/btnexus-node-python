@@ -156,7 +156,7 @@ class NexusConnector():
                 self.sio.connect(self.wsConf)
                 self.sio.wait()
             except socketio.exceptions.ConnectionError as e:
-                if reconnect:
+                if self.reconnect:
                     self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
                     time.sleep(5)
                 else:

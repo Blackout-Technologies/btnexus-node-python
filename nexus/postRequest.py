@@ -49,6 +49,8 @@ class PostRequest():
         except Exception as e:
             if self.errBack:
                 self.errBack(e)
+            else:
+                raise(e)
 
     def send(self, blocking=False, **kwargs):
         """

@@ -24,6 +24,7 @@ class TestHook(unittest.TestCase):
         '''
         test to initialize a Hook
         '''
+        print('TESTING THE HOOK')
         h = ExampleHook(reconnection=False)
         
 
