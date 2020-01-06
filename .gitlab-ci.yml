@@ -1,52 +1,46 @@
 image: python:3.6-alpine
 
 stages:
-  # - test
+  - test
   - docu  
-  # - deploy
+  - deploy
 
-# tesing_pipe:
+# run_tests:
 #   stage: test
 #   script:
-#     - echo $CI_PIPELINE_ID
-#     - echo $CI_PIPELINE_IID
+#     - pip install .
+#     - cd tests
+#     - python -m unittest discover -s .
 
-run_tests:
-  stage: test
-  script:
-    - pip install .
-    - cd tests
-    - python -m unittest discover -s .
+# deploy_staging:
+#   stage: deploy
+#   variables:
+#     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
+#     TWINE_PASSWORD: $STAGING_PASSWORD
+#   script:
+#     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
+#     - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
+#     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
+#     - pip install twine==2.0
+#     - python setup.py sdist
+#     - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+#   only:
+#     - develop
 
-deploy_staging:
-  stage: deploy
-  variables:
-    TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
-    TWINE_PASSWORD: $STAGING_PASSWORD
-  script:
-    # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
-    - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
-    - pip install twine==2.0
-    - python setup.py sdist
-    - twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-  only:
-    - develop
-
-deploy_production:
-  stage: deploy
-  variables:
-    TWINE_USERNAME: $PRODUCTION_USERNAME
-    TWINE_PASSWORD: $PRODUCTION_PASSWORD
-  script:
-    # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
-    - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
-    - pip install twine==2.0
-    - python setup.py sdist
-    - twine upload --verbose dist/*
-  only:
-    - master    
+# deploy_production:
+#   stage: deploy
+#   variables:
+#     TWINE_USERNAME: $PRODUCTION_USERNAME
+#     TWINE_PASSWORD: $PRODUCTION_PASSWORD
+#   script:
+#     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
+#     - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
+#     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
+#     - pip install twine==2.0
+#     - python setup.py sdist
+#     - twine upload --verbose dist/*
+#   only:
+#     - master    
 
 docu_staging:
   stage: docu
