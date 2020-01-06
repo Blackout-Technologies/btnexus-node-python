@@ -223,6 +223,7 @@ class Node(object):
         """
         Runs this node and listen forever
         This is a blocking call
+        Uses the kwargs for the socketio.Client see https://python-socketio.readthedocs.io/en/latest/api.html
         """
         self.setUp() 
         self.nexusConnector.listen(**kwargs)

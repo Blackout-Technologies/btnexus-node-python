@@ -1,9 +1,9 @@
 image: python:3.6-alpine
 
 stages:
-  - test
+  # - test
   - docu  
-  - deploy
+  # - deploy
 
 # tesing_pipe:
 #   stage: test
