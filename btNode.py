@@ -22,8 +22,8 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
 class Node(object):
     """Blackout Nexus node"""
-    NEXUSINFO = 21
-    # TODO: can I add a docstring here? - http://epydoc.sourceforge.net/manual-docstring.html#variable-docstrings
+    NEXUSINFO = 21 #: Logging level for nexus messages
+    """Logging level for nexus messages"""
 
     @classmethod
     def nexusFormat(cls, record):

@@ -52,4 +52,4 @@ class BTPostRequest(PostRequest):
         :param kwargs: keyword arguments for the requests.post call see https://2.python-requests.org//en/v2.5.3/api/ - `headers` cant be customized for a btPostRequest because it is already used internally
         """
 
-        super().send(blocking=blocking, headers=self.headers, **kwargs)
+        super(BTPostRequest, self).send(blocking=blocking, headers=self.headers, **kwargs)

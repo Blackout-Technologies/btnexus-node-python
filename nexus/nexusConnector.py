@@ -29,7 +29,7 @@ __author__      = "Marc Fiedler, Gheorghe Lisca, Adrian Lubitz"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
 
-class NexusConnector():
+class NexusConnector(object):
     """The NexusConnector handles everything from connecting, subscibing and publishing messages in the btNexus"""
     version = "4.0"
     

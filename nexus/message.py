@@ -9,14 +9,14 @@ import json, time, copy, uuid, collections, yaml
 __author__      = "Marc Fiedler"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
-class Message():
+class Message(object):
     """
         Protocol Message object
     """
     data = {}           # Local Data array
     valid = False       # Validation
 
-    version = "4.2.0"   # Protocol version number
+    version = "5.0"   # Protocol version number
 
     def __init__(self, intent=None):
         """

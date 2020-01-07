@@ -1,14 +1,23 @@
 from setuptools import setup, find_packages
-import pathlib
+# import pathlib
 import os
 
 # The directory containing this file
-HERE = pathlib.Path(__file__).parent
+# HERE = pathlib.Path(__file__).parent
+HERE = os.path.dirname(__file__)
 
 # The text of the README file
-README = (HERE / "README.md").read_text()
+readmePath = os.path.join(HERE , "README.md")
+README = ""
+with open(readmePath) as readmeFile:
+    README = readmeFile.read()
 
-VERSION = (HERE / "VERSION").read_text()
+versionPath = os.path.join(HERE , "VERSION")
+VERSION = ""
+with open(versionPath) as versionFile:
+    VERSION = versionFile.read()
+
+# VERSION = (HERE / "VERSION").read_text()
 try:
     VERSION += '.{}'.format(os.environ["CI_PIPELINE_IID"])
 except:

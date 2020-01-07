@@ -32,11 +32,10 @@ You find an API Documentation our [GitHub Page](https://blackout-technologies.gi
 # VERSION 4
 Version 4 changed the protocol to [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** 
 
-*An old version of the Node is still available in btNodeV3*
-<!-- TODO: remove that statement - shouldnt be the case -->
 
 # Known Issues
 Since Version 3.1 Node automatically reconnect on an Error. That means any occurring error causes a reconnect. **KeyboardInterupt is an Error. If you want to terminate your script use `ctrl + Alt Gr + \`**
+*This is solved in Version 4+*
 
 # Introduction
 

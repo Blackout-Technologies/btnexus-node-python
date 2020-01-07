@@ -105,7 +105,7 @@ class Hook(Node):
                         entities=kwargs["entities"], 
                         slots=kwargs["slots"], 
                         branchName=kwargs["branch"]["name"], 
-                        peer=kwargs)#TODO: what is needed peer? only needs infos to indentify message origin
+                        peer=kwargs)
 
     def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
         """
@@ -132,7 +132,7 @@ class Hook(Node):
         """
         self.say(peer, {'answer':"Hook needs to overload onMessage"})  # if not overloaded this is what your hook will say
 
-    def say(self, peer, message): # TODO: check if message is just a string wrap it in the answer field ;)
+    def say(self, peer, message): 
         """
         publishes the hooks response.
 
@@ -168,7 +168,7 @@ class Hook(Node):
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
-                'version': self.version  #TODO: this should be the version of the implementation not the lib
+                'version': self.version  
                 }
         
 

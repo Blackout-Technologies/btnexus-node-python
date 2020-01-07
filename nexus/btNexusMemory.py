@@ -15,7 +15,7 @@ from btPostRequest import BTPostRequest
 __author__      = "Adrian Lubitz"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
-class BTNexusMemory():
+class BTNexusMemory(object):
     """Memory in the Nexus Network."""
     def __init__(self, url, token):
         """

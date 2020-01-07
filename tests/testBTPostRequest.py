@@ -1,9 +1,11 @@
 '''Tests for the BTPostRequest'''
 # System imports
+from __future__ import print_function
 import unittest
 from threading import Lock
 import time
 import os
+
 
 # 3rd Party imports
 from btPostRequest import BTPostRequest

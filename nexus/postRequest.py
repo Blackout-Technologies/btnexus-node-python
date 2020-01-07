@@ -13,7 +13,7 @@ import requests
 __author__      = "Adrian Lubitz"
 __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
-class PostRequest():
+class PostRequest(object):
     """
     A post request with a callback for the response
     """
@@ -42,8 +42,8 @@ class PostRequest():
         """
         try:
             r = requests.post(self.url, data=self.data, **kwargs)
-            content =json.loads(r.content)
             r.raise_for_status()
+            content =json.loads(r.content)            
             if self.callback:
                 self.callback(r.json())
         except Exception as e:
