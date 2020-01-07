@@ -5,7 +5,15 @@ stages:
   - docu  
   - deploy
 
-run_tests:
+run_tests3.6:
+  stage: test
+  script:
+    - pip install .
+    - cd tests
+    - python -m unittest discover -s .
+
+run_tests2.7:
+  image: python:2.7-alpine
   stage: test
   script:
     - pip install .
