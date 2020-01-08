@@ -50,4 +50,3 @@ setup(name='btnexus-node-python',
           'python-socketio'
     ],
 )
-####TODO: VERSION NEEDS TO GO TO DEPS
