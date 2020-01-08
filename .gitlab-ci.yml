@@ -26,9 +26,8 @@ deploy_staging:
     TWINE_USERNAME: $STAGING_USERNAME # set in gitlab
     TWINE_PASSWORD: $STAGING_PASSWORD
   script:
-    # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
     - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
-    - echo -n $VERSION > VERSION #TODO: add to production
+    - echo -n $VERSION > VERSION 
     - cat VERSION
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
@@ -45,6 +44,8 @@ deploy_production:
   script:
     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
     - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
+    - echo -n $VERSION > VERSION 
+    - cat VERSION
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
     - python setup.py sdist
