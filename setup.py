@@ -33,7 +33,6 @@ setup(name='btnexus-node-python',
     url="https://github.com/Blackout-Technologies/btnexus-node-python",
     author="Blackout Technologies",
     author_email="dev@blackout.ai",
-    package_data={'': ['VERSION']},
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
