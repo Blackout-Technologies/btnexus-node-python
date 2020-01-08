@@ -33,6 +33,8 @@ setup(name='btnexus-node-python',
     url="https://github.com/Blackout-Technologies/btnexus-node-python",
     author="Blackout Technologies",
     author_email="dev@blackout.ai",
+    package_data={'': ['VERSION']},
+    include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Programming Language :: Python :: 3.6",
@@ -49,5 +51,4 @@ setup(name='btnexus-node-python',
           'python-socketio'
     ],
 )
-####TODO: add requirements and bring it to the newest style to install via PyPi, is find_packages the best option?
-####TODO: https://realpython.com/pypi-publish-python-package/ maybe use Flit that makes it easier
+####TODO: VERSION NEEDS TO GO TO DEPS
