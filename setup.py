@@ -18,10 +18,10 @@ with open(versionPath) as versionFile:
     VERSION = versionFile.read()
 
 # VERSION = (HERE / "VERSION").read_text()
-try:
-    VERSION += '.{}'.format(os.environ["CI_PIPELINE_IID"])
-except:
-    print('LOCAL BUILD')
+# try:
+#     VERSION += '.{}'.format(os.environ["CI_PIPELINE_IID"])
+# except:
+#     print('LOCAL BUILD')
 
 
 
