@@ -87,8 +87,9 @@ class Node(object):
     def linkModule(self, module,group, topic):
         """
         EXPERIMENTAL
-        Link a python object to the messaging service
-        This makes every method of the object accessable as callbacks over the btNexus
+        Link a python module to the messaging service
+        This makes every routine of the module accessable as callbacks over the btNexus
+        the routines are checked with inspect.isroutine()
 
         :param module: the module to be linked
         :type module: Object
