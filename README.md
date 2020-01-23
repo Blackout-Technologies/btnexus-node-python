@@ -7,14 +7,14 @@
 |Author|Adrian Lubitz|
 |Author|Marc Fiedler|
 |Email|dev@blackout.ai|
-|Latest stable version|3.2|
-|Required Axon versions| >= 3.0.0|
-|Runs on|Python 3.6+|
+|Latest stable version|4.0|
+|Required Axon versions| >= 4.0.0|
+|Runs on|Python 2.7+ or Python 3.6+|
 |State|`Stable`|
 
 # Prerequisites
 
-* Python installed (either 2.7+ or Python 3)
+* Python installed (either 2.7+ or Python 3.6+)
 * Owner of a btNexus instance or a btNexus account
 
 # Install btnexus-node-python

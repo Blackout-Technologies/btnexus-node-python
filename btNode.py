@@ -8,6 +8,8 @@ import sys
 from collections import defaultdict
 import inspect
 import os
+from inspect import getmembers, isfunction, ismethod
+
 
 # 3rd Party imports
 
@@ -97,8 +99,11 @@ class Node(object):
         """
         # Construct a callback
         #module = ALProxy(moduleName).session().service(moduleName)
-        for func in module.__dict__:
-            self.subscribe(group, topic, module.__dict__[func], func)
+        funcs = [o for o in getmembers(module) if isfunction(o[1]) or ismethod(o[1]) and not o[0].startswith('__')] # contains all functions if it is a module and all methods if it is an object except for the ones starting with a double underscore
+        # tuples of the name and the function
+        for funcName, func in funcs:
+            self.subscribe(group, topic, func) #funcName?
+            
 
     def subscribe(self, group, topic, callback, funcName=None):
         """
@@ -213,6 +218,7 @@ class Node(object):
         """
         self.logger.log(self.NEXUSINFO,"[{}]: setUp".format(self.nodeName))
 
+    # Can be handled by onDisconnected
     # def cleanUp(self):
     #     """
     #     Implement this to handle the things, which should be done when you disconnect the node.
