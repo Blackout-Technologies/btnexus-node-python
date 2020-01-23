@@ -8,7 +8,7 @@ import sys
 from collections import defaultdict
 import inspect
 import os
-from inspect import getmembers, isfunction, ismethod
+from inspect import getmembers, isroutine
 
 
 # 3rd Party imports
@@ -99,7 +99,7 @@ class Node(object):
         """
         # Construct a callback
         #module = ALProxy(moduleName).session().service(moduleName)
-        funcs = [o for o in getmembers(module) if isfunction(o[1]) or ismethod(o[1]) and not o[0].startswith('__')] # contains all functions if it is a module and all methods if it is an object except for the ones starting with a double underscore
+        funcs = [o for o in getmembers(module) if isroutine(o[1]) and not o[0].startswith('__')] # contains all functions if it is a module and all methods if it is an object except for the ones starting with a double underscore
         # tuples of the name and the function
         for funcName, func in funcs:
             self.subscribe(group, topic, func) #funcName?
