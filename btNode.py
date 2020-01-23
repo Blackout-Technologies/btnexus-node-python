@@ -103,7 +103,7 @@ class Node(object):
         funcs = [o for o in getmembers(module) if isroutine(o[1]) and not o[0].startswith('__')] # contains all functions if it is a module and all methods if it is an object except for the ones starting with a double underscore
         # tuples of the name and the function
         for funcName, func in funcs:
-            self.subscribe(group, topic, func) #funcName?
+            self.subscribe(group, topic, func, funcName)
             
 
     def subscribe(self, group, topic, callback, funcName=None):
