@@ -142,7 +142,7 @@ class NexusConnector(object):
         """
         self.debug = mode
 
-    def listen(self, **kwargs): # TODO: is it possible to use kwargs twice? - for init() and connect()?
+    def listen(self, blocking = True, **kwargs): # TODO: is it possible to use kwargs twice? - for init() and connect()?
         """Start listening on Websocket communication"""
         # SSLOPTS
         ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
@@ -154,7 +154,10 @@ class NexusConnector(object):
             _reconnect = self.reconnect # Do While
             try:
                 self.sio.connect(self.wsConf)
-                self.sio.wait()
+                if blocking:
+                    self.sio.wait()
+                else:
+                    break #this will never be reached if wait() is used
             except socketio.exceptions.ConnectionError as e:
                 if self.reconnect:
                     self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
