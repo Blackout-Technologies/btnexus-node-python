@@ -56,8 +56,8 @@ class Node(object):
             self.debug = debug
 
         self.nodeName = self.__class__.__name__
-        if not self.axonURL.endswith("/"):
-            self.axonURL += "/"
+        # if not self.axonURL.endswith("/"):
+        #     self.axonURL += "/"
 
         if not logger:
             self.logger = logging.getLogger('btNexus.{}'.format(self.nodeName))
@@ -82,7 +82,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL + self.nodeName, self.debug, self.logger)
+        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL, self.debug, self.logger)
 
     def linkModule(self, module,group, topic):
         """

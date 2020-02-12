@@ -12,3 +12,8 @@ class NoCallbackFoundException(Exception):
         This can adds a specific Text to the exception, why there is no callback.
         """
         super(NoCallbackFoundException, self).__init__(str(e))
+
+class NoProtocolException(Exception):
+    """ There is no protocol for the host"""
+    def __init__(self, host):
+        super(NoProtocolException, self).__init__("No protocol given for host {}. You must provide http or https as protocol".format(host))

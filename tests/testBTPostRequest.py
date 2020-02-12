@@ -26,7 +26,7 @@ class TestBTPostRequest(unittest.TestCase):
         self.personalityId = os.environ["PERSONALITYID"]
         self.integrationId = os.environ["INTEGRATIONID"]
         print('Token: {}'.format(self.token))
-        print('url: {}'.format('https://' + self.axon))
+        print('url: {}'.format(self.axon))
 
 
     def callback(self, response):
@@ -59,7 +59,7 @@ class TestBTPostRequest(unittest.TestCase):
         }
 
         self.lock.acquire()
-        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url='https://' + self.axon, callback=self.callback, errBack=self.errBack).send()
+        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.callback, errBack=self.errBack).send()
         self.lock.acquire()
         if self.errorMsg:
             raise Exception(self.errorMsg)
@@ -75,7 +75,7 @@ class TestBTPostRequest(unittest.TestCase):
         'integrationId': self.integrationId,
         'personalityId': self.personalityId
         }
-        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url='https://' + self.axon, callback=print).send(blocking=True, timeout=2)
+        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axon, callback=print).send(blocking=True, timeout=2)
 
 if __name__ == "__main__":
     unittest.main()

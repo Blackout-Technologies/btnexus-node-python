@@ -63,12 +63,10 @@ class Hook(Node):
             warnings.warn("You are using a deprecated verion of the connect hash.", Warning) #Apperently DeprecationWarnings are ignored for some reason
 
         self.token = self.config["token"]
-        self.host = urlsplit(self.config["host"]).netloc
-        if not self.host:
-            self.host = self.config["host"] # backwardscompatibility
+        self.host = self.config["host"]
 
-        self.memory = BTNexusMemory("https://" + self.host, self.token)
-        self.data = BTNexusData("https://" + self.host, self.token, self.config['id'])
+        self.memory = BTNexusMemory(self.host, self.token)
+        self.data = BTNexusData(self.host, self.token, self.config['id'])
         super(Hook, self).__init__(self.token, self.host)
         self.onInit(**kwargs)
         self.connect(**kwargs)
