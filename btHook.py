@@ -5,6 +5,7 @@ import base64
 import json
 import sys
 import inspect
+import warnings
 if sys.version_info.major == 2:
     from urlparse import urlsplit
 else:
@@ -55,6 +56,12 @@ class Hook(Node):
         self.config = json.loads(base64.b64decode(connectHash))
 
         #call super constructor with axon and token set
+        try:
+            print('getting HASHVERSION')
+            self.connectHashVersion = self.config['version']
+        except KeyError:
+            warnings.warn("You are using a deprecated verion of the connect hash.", Warning) #Apperently DeprecationWarnings are ignored for some reason
+
         self.token = self.config["token"]
         self.host = urlsplit(self.config["host"]).netloc
         if not self.host:
