@@ -25,4 +25,5 @@ if __name__ == '__main__':
     a.update({"a":["b"]})
     l = ["b"]
     a.update({"a":l})
+    a.update(a)
     print(a)
