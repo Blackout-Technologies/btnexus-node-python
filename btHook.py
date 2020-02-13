@@ -17,6 +17,7 @@ from btNode import Node # have it like this so it will still be possible to sepe
 # local imports
 from nexus.btNexusMemory import BTNexusMemory
 from nexus.btNexusData import BTNexusData
+from nexus.btCaptions import BTCaptions
 
 
 # end file header
@@ -39,9 +40,7 @@ class Hook(Node):
         with open(configpath) as jsonFile:
             self.version = json.load(jsonFile)["version"]
 
-        with open(captionsPath) as jsonFile:
-            self.captions = json.load(jsonFile)
-
+        self.captions = BTCaptions(captionsPath) # TODO: add some docstring to be visibile in the docu
 
         #get connectHash
         self.initKwargs = kwargs
@@ -60,7 +59,7 @@ class Hook(Node):
             print('getting HASHVERSION')
             self.connectHashVersion = self.config['version']
         except KeyError:
-            warnings.warn("You are using a deprecated verion of the connect hash.", Warning) #Apperently DeprecationWarnings are ignored for some reason
+            warnings.warn("You are using a deprecated version of the connect hash.", DeprecationWarning) #Apperently DeprecationWarnings are ignored for some reason
 
         self.token = self.config["token"]
         self.host = self.config["host"]
@@ -71,6 +70,16 @@ class Hook(Node):
         self.onInit(**kwargs)
         self.connect(**kwargs)
 
+    def getCaption(self, lang, key):
+        """
+        Returns a phrase from the captions file. If a list of phrases is given in the captions file one is chosen randomly. If only a String is given it returns this. 
+
+        :param lang: the requested language
+        :type lang: String
+        :param key: key for a specific phrase
+        :type key: String
+        """
+        return self.captions.getPhrase(lang, key)
 
     def onConnected(self):
         """
