@@ -134,12 +134,12 @@ class Node(object):
         :param params: The parameters for the callback
         :type params: List or keywordDict
         """
-        if type(topic) != str:
-            self.publishError("Topic needs to be a String. Is of type {}".format(type(topic)))
-            return
-        if type(funcName) != str:
-            self.publishError("FuncName needs to be a String. Is of type {}".format(type(funcName)))
-            return
+        # if type(topic) != str:
+        #     self.publishError("Topic needs to be a String. Is of type {}".format(type(topic)))
+        #     return
+        # if type(funcName) != str:
+        #     self.publishError("FuncName needs to be a String. Is of type {}".format(type(funcName)))
+        #     return
         if type(params) == list or type(params) == dict:
             pass
         else:

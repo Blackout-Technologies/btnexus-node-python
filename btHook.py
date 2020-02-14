@@ -85,7 +85,6 @@ class Hook(Node):
         """
         Setup all Callbacks
         """
-        
         self.memory.addEvent(self.memoryData)
         # Join complete
         self.subscribe(self.config["id"], 'hookChat', self._onMessage, "onMessage") 
@@ -194,7 +193,7 @@ class Hook(Node):
         super(Hook, self)._onDisconnected()
         self.memory.removeEvent(self.memoryData)
         self.readyState = 'exit'
-        self.state()
+        # self.state() # TODO: this cant work - how should the state be sent if the Hook is no longer connected...?
 
     def save(self, key, value, callback=None):
         """
