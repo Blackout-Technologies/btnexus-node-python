@@ -6,7 +6,8 @@ stages:
   - deploy
 
 run_tests3.6:
-  stage: blackouttechnologies/py36-build-essential
+  image: blackouttechnologies/py36-build-essential
+  stage: test
   script:
     - pip install .
     - cd tests
