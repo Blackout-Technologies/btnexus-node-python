@@ -340,9 +340,9 @@ class NexusConnector(object):
         self.isConnected = False
         self.isRegistered = False
         self.logger.log(self.parent.NEXUSINFO, "Connection closed")
-        self.parent.onDisconnected()
+        self.parent._onDisconnected()
         if self.reconnect:
-            self.parent.setUp()
+            self.parent._setUp()
 
     def defineCallbacks(self):
         @self.sio.event
@@ -361,7 +361,6 @@ class NexusConnector(object):
             msg["id"] = self.nodeId
             msg["node"] = {}    #TODO: What should be in this field?
             self.publish(msg)
-            print("Registered with transport: {}".format(self.sio.transport())) # TODO: remove!
         
         @self.sio.on('message')
         def onMessage(data):

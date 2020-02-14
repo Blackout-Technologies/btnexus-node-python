@@ -82,7 +82,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(self.onConnected, self, self.token, self.axonURL, self.debug, self.logger)
+        self.nexusConnector = NexusConnector(self._onConnected, self, self.token, self.axonURL, self.debug, self.logger)
 
     def linkModule(self, module,group, topic):
         """
@@ -206,18 +206,26 @@ class Node(object):
         if self.debug:
             self.logger.warning("You are using deprecated method nodeConnected(). You should use onConnected()")
         self.nodeConnected()
+    def _onConnected(self):
+        """This is used in classes that are base classes. It enables you to support the callback in a clean way without calling super. Therefore you need to call super here."""
+        self.onConnected()
 
     def onDisconnected(self):
         """
         This will be executed after a the Node is disconnected from the btNexus - here Threads can be closed or other variables can be reset.
         """
         self.logger.log(self.NEXUSINFO, "[{}]: onDisconnected".format(self.nodeName))
-
+    def _onDisconnected(self):
+        """This is used in classes that are base classes. It enables you to support the callback in a clean way without calling super. Therefore you need to call super here."""
+        self.onDisconnected()
     def setUp(self):
         """
         Implement this to handle the things, which should be done before the connection to nexus is established. This will also be called for reconnects.
         """
         self.logger.log(self.NEXUSINFO,"[{}]: setUp".format(self.nodeName))
+    def _setUp(self):
+        """This is used in classes that are base classes. It enables you to support the callback in a clean way without calling super. Therefore you need to call super here."""
+        self.setUp()
 
     # Can be handled by onDisconnected
     # def cleanUp(self):
@@ -232,7 +240,7 @@ class Node(object):
         This is a blocking call
         Uses the kwargs for the socketio.Client see https://python-socketio.readthedocs.io/en/latest/api.html
         """
-        self.setUp() 
+        self._setUp() 
         self.nexusConnector.listen(**kwargs)
 
     def disconnect(self):

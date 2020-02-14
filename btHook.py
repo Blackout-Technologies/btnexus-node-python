@@ -175,10 +175,11 @@ class Hook(Node):
             print("onInit with params: {}".format(kwargs))
 
 
-    def setUp(self):
+    def _setUp(self):
         """
         Register the hook in the system
         """
+        super(Hook, self)._setUp()
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
@@ -186,10 +187,11 @@ class Hook(Node):
                 }
         
 
-    def cleanUp(self):
+    def _onDisconnected(self):
         """
         Unregister the hook and send exit state
         """
+        super(Hook, self)._onDisconnected()
         self.memory.removeEvent(self.memoryData)
         self.readyState = 'exit'
         self.state()

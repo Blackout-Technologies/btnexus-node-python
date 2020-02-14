@@ -40,13 +40,16 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.7",
     ],
     packages = find_packages(),
-    py_modules=['btNode', 'btNodeV3', 'btHook', 'btPostRequest'], #TODO: take out the IO stuff
+    py_modules=['btNode', 'btNodeV3', 'btHook', 'btPostRequest', 'btStreamingNode'],
     install_requires=[
           'pyyaml',
           'six',
           'certifi',
           'backports.ssl_match_hostname',
           'requests',
-          'python-socketio'
+          'python-socketio', 
+          'Twisted',
+          'pyOpenSSL', 
+          'service_identity'
     ],
 )
