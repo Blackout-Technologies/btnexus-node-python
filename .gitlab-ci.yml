@@ -62,7 +62,8 @@ docu_staging:
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
     - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
-    - apk update && apk upgrade && apk add --virtual build-dependencies build-base gcc wget git tree
+    - apt-get update -yq 
+    - apt-get install -yq git tree
     - git config --global user.email "dev@blackout.ai"
     - git config --global user.name "The Docs Guy"
     - git clone $DOCUREPO
