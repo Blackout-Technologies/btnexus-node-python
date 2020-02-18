@@ -55,6 +55,7 @@ deploy_production:
     - master    
 
 docu_staging:
+  image: blackouttechnologies/py36-build-essential
   stage: docu
   variables:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
