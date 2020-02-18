@@ -59,13 +59,17 @@ class NexusConnector(object):
         self.parent = parent
         self.parentName = self.parent.nodeName
         self.nodeId = None #str(uuid.uuid4())
-        self.protocol = "wss" 
+        # self.protocol = "wss" 
         self.token = token
         self.axon = axonURL
+
+        if not '://' in self.axon:
+            raise NoProtocolException(self.axon)
+
         self.debug = debug
 
 
-        self.wsConf = self.protocol + "://"+ str(self.axon)
+        # self.wsConf = self.protocol + "://"+ str(self.axon)
 
         self.logger = logger
 
@@ -153,7 +157,7 @@ class NexusConnector(object):
         while(_reconnect):
             _reconnect = self.reconnect # Do While
             try:
-                self.sio.connect(self.wsConf)
+                self.sio.connect(self.axon)
                 if blocking:
                     self.sio.wait()
                 else:
@@ -336,9 +340,9 @@ class NexusConnector(object):
         self.isConnected = False
         self.isRegistered = False
         self.logger.log(self.parent.NEXUSINFO, "Connection closed")
-        self.parent.onDisconnected()
+        self.parent._onDisconnected()
         if self.reconnect:
-            self.parent.setUp()
+            self.parent._setUp()
 
     def defineCallbacks(self):
         @self.sio.event

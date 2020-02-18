@@ -22,9 +22,7 @@ class TestHook(Hook):
         """
         respond with predefined text
         """
-        message = "Hallo Welt von meinem neuen python btNexus Hook!"
-        if self.captions:
-            message = self.captions[language]['sayHi']
+        message = self.getCaption(language,'sayHi')
         
         self.say(peer, message)
 

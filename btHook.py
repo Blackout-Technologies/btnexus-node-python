@@ -5,6 +5,7 @@ import base64
 import json
 import sys
 import inspect
+import warnings
 if sys.version_info.major == 2:
     from urlparse import urlsplit
 else:
@@ -16,6 +17,7 @@ from btNode import Node # have it like this so it will still be possible to sepe
 # local imports
 from nexus.btNexusMemory import BTNexusMemory
 from nexus.btNexusData import BTNexusData
+from nexus.btCaptions import BTCaptions
 
 
 # end file header
@@ -38,9 +40,7 @@ class Hook(Node):
         with open(configpath) as jsonFile:
             self.version = json.load(jsonFile)["version"]
 
-        with open(captionsPath) as jsonFile:
-            self.captions = json.load(jsonFile)
-
+        self.captions = BTCaptions(captionsPath) # TODO: add some docstring to be visibile in the docu
 
         #get connectHash
         self.initKwargs = kwargs
@@ -55,23 +55,36 @@ class Hook(Node):
         self.config = json.loads(base64.b64decode(connectHash))
 
         #call super constructor with axon and token set
-        self.token = self.config["token"]
-        self.host = urlsplit(self.config["host"]).netloc
-        if not self.host:
-            self.host = self.config["host"] # backwardscompatibility
+        try:
+            print('getting HASHVERSION')
+            self.connectHashVersion = self.config['version']
+        except KeyError:
+            warnings.warn("You are using a deprecated version of the connect hash.", DeprecationWarning) #Apperently DeprecationWarnings are ignored for some reason
 
-        self.memory = BTNexusMemory("https://" + self.host, self.token)
-        self.data = BTNexusData("https://" + self.host, self.token, self.config['id'])
+        self.token = self.config["token"]
+        self.host = self.config["host"]
+
+        self.memory = BTNexusMemory(self.host, self.token)
+        self.data = BTNexusData(self.host, self.token, self.config['id'])
         super(Hook, self).__init__(self.token, self.host)
         self.onInit(**kwargs)
         self.connect(**kwargs)
 
+    def getCaption(self, lang, key):
+        """
+        Returns a phrase from the captions file. If a list of phrases is given in the captions file one is chosen randomly. If only a String is given it returns this. 
+
+        :param lang: the requested language
+        :type lang: String
+        :param key: key for a specific phrase
+        :type key: String
+        """
+        return self.captions.getPhrase(lang, key)
 
     def onConnected(self):
         """
         Setup all Callbacks
         """
-        
         self.memory.addEvent(self.memoryData)
         # Join complete
         self.subscribe(self.config["id"], 'hookChat', self._onMessage, "onMessage") 
@@ -161,10 +174,11 @@ class Hook(Node):
             print("onInit with params: {}".format(kwargs))
 
 
-    def setUp(self):
+    def _setUp(self):
         """
         Register the hook in the system
         """
+        super(Hook, self)._setUp()
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
@@ -172,13 +186,14 @@ class Hook(Node):
                 }
         
 
-    def cleanUp(self):
+    def _onDisconnected(self):
         """
         Unregister the hook and send exit state
         """
+        super(Hook, self)._onDisconnected()
         self.memory.removeEvent(self.memoryData)
         self.readyState = 'exit'
-        self.state()
+        # self.state() # TODO: this cant work - how should the state be sent if the Hook is no longer connected...?
 
     def save(self, key, value, callback=None):
         """
