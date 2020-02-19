@@ -18,8 +18,10 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
 class StreamingNode(Node):
 
-    # def __init__((self, token=None,  axonURL=None,  debug=None, logger=None):
-    #     super()
+    def __init__(self, token=None,  axonURL=None, debug=None, logger=None, personalityId=None, integrationId=None):
+        super(StreamingNode, self).__init__(token=token,  axonURL=axonURL, debug=debug, logger=logger)
+        self.personalityId = personalityId
+        self.integrationId = integrationId
 
     def connect(self):
         from twisted.internet import reactor
@@ -30,9 +32,11 @@ class StreamingNode(Node):
         super(StreamingNode, self)._setUp()
         print("Calling StreamingNode _setUp")
         self.transport = None
-        self.personalityId = os.environ["PERSONALITYID"] 
+        if not self.personalityId:
+            self.personalityId = os.environ["PERSONALITYID"] 
         # self.msKey = os.environ["MSKEY"]
-        self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
+        if not self.integrationId:
+            self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
         params = {
             'integrationId': self.integrationId,
             'personalityId': self.personalityId
