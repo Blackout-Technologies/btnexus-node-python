@@ -30,7 +30,6 @@ class StreamingNode(Node):
 
     def _setUp(self):
         super(StreamingNode, self)._setUp()
-        print("Calling StreamingNode _setUp")
         self.transport = None
         if not self.personalityId:
             self.personalityId = os.environ["PERSONALITYID"] 
