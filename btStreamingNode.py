@@ -18,10 +18,12 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
 class StreamingNode(Node):
 
-    def __init__(self, token=None,  axonURL=None, debug=None, logger=None, personalityId=None, integrationId=None):
+    def __init__(self, token=None,  axonURL=None, debug=None, logger=None, personalityId=None, integrationId=None, language='en-US', sessionId=None):
         super(StreamingNode, self).__init__(token=token,  axonURL=axonURL, debug=debug, logger=logger)
         self.personalityId = personalityId
         self.integrationId = integrationId
+        self.language = language
+        self.sessionId = sessionId
 
     def connect(self):
         from twisted.internet import reactor
@@ -41,17 +43,19 @@ class StreamingNode(Node):
             'integrationId': self.integrationId,
             'personalityId': self.personalityId
         }
-        try:
-            print("URL: {}".format(self.axonURL))
-            BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
-        except Exception as e:
+        if not self.sessionId:
             try:
-                self.publishError('Unable to get sessionId: {}'.format(e))
-            except:
-                pass # if not connected it will only print here
-            time.sleep(2) # sleep
-            self._setUp()  # and retry
-        self.language = 'en-US' # TODO: This needs to be dynamic!!!
+                print("URL: {}".format(self.axonURL))
+                BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
+            except Exception as e:
+                try:
+                    self.publishError('Unable to get sessionId: {}'.format(e))
+                except:
+                    pass # if not connected it will only print here
+                time.sleep(2) # sleep
+                self._setUp()  # and retry
+            
+        
 
     def setSessionId(self, response):
         # print('response: {}'.format(response))
