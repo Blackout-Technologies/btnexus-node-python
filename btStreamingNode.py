@@ -56,7 +56,7 @@ class StreamingNode(Node):
         # print('response: {}'.format(response))
         if response['success']:
             self.sessionId = response['sessionToken']
-            print('set sessionId to {}'.format(self.sessionId))
+            print('[{}]set sessionId to {}'.format(self.nodeName, self.sessionId))
         else:
             pass # TODO: what should I do here? - retry
 
