@@ -153,21 +153,26 @@ class NexusConnector(object):
         self.reconnect = kwargs['reconnection'] if 'reconnection' in kwargs else True
         self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger, **kwargs)
         self.defineCallbacks()
-        _reconnect = True
-        while(_reconnect):
-            _reconnect = self.reconnect # Do While
-            try:
-                self.sio.connect(self.axon)
-                if blocking:
-                    self.sio.wait()
-                else:
-                    break #this will never be reached if wait() is used
-            except socketio.exceptions.ConnectionError as e:
-                if self.reconnect:
-                    self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
-                    time.sleep(5)
-                else:
-                    raise e
+        self.sio.connect(self.axon)
+        if blocking:
+            self.sio.wait() # This waits until disconnect!?!?
+
+        # _reconnect = True
+        # while(_reconnect):
+        #     _reconnect = self.reconnect # Do While
+        #     try:
+        #         self.sio.connect(self.axon)
+        #         if blocking:
+        #             self.sio.wait() # This waits until disconnect!?!?
+        #             print('back in the reconnect loop')
+        #         else:
+        #             break #this will never be reached if wait() is used
+        #     except socketio.exceptions.ConnectionError as e:
+        #         if self.reconnect:
+        #             self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
+        #             time.sleep(5)
+        #         else:
+        #             raise e
 
     def disconnect(self):
         """

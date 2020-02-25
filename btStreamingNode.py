@@ -18,43 +18,55 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
 class StreamingNode(Node):
 
-    def __init__(self, token=None,  axonURL=None, debug=None, logger=None, personalityId=None, integrationId=None, language='en-US', sessionId=None):
-        super(StreamingNode, self).__init__(token=token,  axonURL=axonURL, debug=debug, logger=logger)
-        self.personalityId = personalityId
-        self.integrationId = integrationId
-        self.language = language
-        self.sessionId = sessionId
+    def __init__(self, **kwargs):
+        super(StreamingNode, self).__init__(**kwargs) 
+        # self.personalityId = personalityId
+        # self.integrationId = integrationId
+        # self.language = language
+        # self.sessionId = sessionId
+        # print('after STREAMINGINIT')
 
-    def connect(self):
+    def connect(self, **kwargs):
         from twisted.internet import reactor
-        super(StreamingNode, self).connect(blocking=False)
+        super(StreamingNode, self).connect(blocking=False, **kwargs)
         reactor.run()
 
     def _setUp(self):
-        super(StreamingNode, self)._setUp()
         self.transport = None
-        if not self.personalityId:
+        if 'language' in self.initKwargs:
+            self.language = self.initKwargs['language']
+        else:
+            self.language = 'en-US'
+        if 'personalityId' in self.initKwargs:
+            self.personalityId = self.initKwargs['personalityId']
+        else:
             self.personalityId = os.environ["PERSONALITYID"] 
         # self.msKey = os.environ["MSKEY"]
-        if not self.integrationId:
+        if 'integrationId' in self.initKwargs:
+            self.integrationId = self.initKwargs['integrationId']
+        else:
             self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
         params = {
             'integrationId': self.integrationId,
             'personalityId': self.personalityId
         }
-        if not self.sessionId:
+        if 'sessionId' in self.initKwargs:
+            self.sessionId = self.initKwargs['sessionId']
+        else:
             try:
-                print("URL: {}".format(self.axonURL))
-                BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
-            except Exception as e:
+                print("reusing sessionId: {}".format(self.sessionId))
+            except AttributeError:
                 try:
-                    self.publishError('Unable to get sessionId: {}'.format(e))
-                except:
-                    pass # if not connected it will only print here
-                time.sleep(2) # sleep
-                self._setUp()  # and retry
-            
-        
+                    print("URL: {}".format(self.axonURL))
+                    BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
+                except Exception as e:
+                    try:
+                        self.publishError('Unable to get the sessionId: {}'.format(e))
+                    except:
+                        print('Unable to get the sessionId: {}'.format(e)) # if not connected just prints
+                    time.sleep(2) # sleep
+                    self._setUp()  # and retry
+        super(StreamingNode, self)._setUp()
 
     def setSessionId(self, response):
         # print('response: {}'.format(response))
@@ -66,11 +78,15 @@ class StreamingNode(Node):
 
     def _onDisconnected(self): 
         # kill the connection here
-        super(StreamingNode, self)._onDisconnected()
         if self.transport:
             self.transport.loseConnection()
-            self.transport.connectionLost(reason=None)
-            print('Killing the AudioStreamer')
+            # self.transport.connectionLost(reason=None) - this is a callback not a function to call ^^
+            print('Killing the Streaming')
+        if self.disconnecting: # Disconnect was initialized by myself
+            from twisted.internet import reactor
+            reactor.stop()
+
+        super(StreamingNode, self)._onDisconnected()
 
     def _onConnected(self): 
         """
@@ -79,19 +95,19 @@ class StreamingNode(Node):
 
         :returns: None
         """
-        super(StreamingNode, self)._onConnected()
         # start the streaming in a thread
         # start a sending client here
-        self.subscribe(group=self.personalityId, topic='audio', callback=self.initStream_response)
-        self.publish(group=self.personalityId, topic='audio', funcName='initStream', params=[self.sessionId, self.language])
+        # self.subscribe(group=self.personalityId, topic='speechToText', callback=self.initStream_response)
+        # TODO: also subscribe to persId.sessId, speechToText, streamTo
+        self.subscribe(group='{}.{}'.format(self.personalityId, self.sessionId), topic='speechToText', callback=self.streamTo)
+        self.publish(group=self.personalityId, topic='speechToText', funcName='initStream', params=[self.sessionId, self.language])
+        super(StreamingNode, self)._onConnected()
 
-
-    def initStream_response(self, **kwargs):
+    def streamTo(self, host, port):
         if not self.transport:
-            serverAddress = kwargs['returnValue']
-            print('Want to connect to {}'.format(serverAddress))
-            self.host, self.port = serverAddress.split(':')
-            self.port = int(self.port)
+            self.host = host
+            self.port = int(port)
+            print('Want to connect to {}:{}'.format(host, port))
             factory = AudioStreamFactory(self)
             from twisted.internet import reactor
             reactor.callFromThread(reactor.connectSSL, self.host, self.port, factory, ssl.ClientContextFactory())
@@ -102,7 +118,6 @@ class StreamingNode(Node):
     def _startStreaming(self, transport):
         self.transport = transport
         Thread(target=self.onStreamReady).start()
-
 
     def onStreamReady(self):
         '''

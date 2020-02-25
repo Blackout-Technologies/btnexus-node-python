@@ -9,6 +9,7 @@ from collections import defaultdict
 import inspect
 import os
 from inspect import getmembers, isroutine
+from threading import Timer
 
 
 # 3rd Party imports
@@ -33,7 +34,7 @@ class Node(object):
             record.levelname = 'NEXUSINFO'   
         return '[{}] {} - {} : {}'.format(record.levelname, record.name, record.created, record.msg)
 
-    def __init__(self, token=None,  axonURL=None,  debug=None, logger=None):
+    def __init__(self, token=None,  axonURL=None,  debug=None, logger=None, **kwargs):
         """
         Constructor sets up the NexusConnector.
 
@@ -44,6 +45,7 @@ class Node(object):
         :param debug: switch for debug messages
         :type debug: bool
         """
+        self.disconnecting = False
         self.token = token
         if self.token == None:
             self.token = os.environ["TOKEN"]
@@ -83,6 +85,8 @@ class Node(object):
             self.logger = logger
         
         self.nexusConnector = NexusConnector(self._onConnected, self, self.token, self.axonURL, self.debug, self.logger)
+        print('NODE saves these kwargs: {}'.format(kwargs))
+        self.initKwargs = kwargs
 
     def linkModule(self, module,group, topic):
         """
@@ -240,13 +244,20 @@ class Node(object):
         This is a blocking call
         Uses the kwargs for the socketio.Client see https://python-socketio.readthedocs.io/en/latest/api.html
         """
-        self._setUp() 
-        self.nexusConnector.listen(**kwargs)
+        try:
+            self._setUp() 
+            self.nexusConnector.listen(**kwargs)
+        except socketio.exceptions.ConnectionError as e: #reconnects on initial connect() if not connected to the internet
+            Timer(2.0, self.connect, kwargs=kwargs).start()
+            self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axonURL))
+
+
 
     def disconnect(self):
         """
         Closes the connection to the Axon
         """
+        self.disconnecting = True
         self.nexusConnector.disconnect()
 
     def run(self):
