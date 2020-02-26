@@ -251,8 +251,6 @@ class Node(object):
             Timer(2.0, self.connect, kwargs=kwargs).start()
             self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axonURL))
 
-
-
     def disconnect(self):
         """
         Closes the connection to the Axon

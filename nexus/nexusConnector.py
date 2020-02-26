@@ -347,7 +347,8 @@ class NexusConnector(object):
         self.logger.log(self.parent.NEXUSINFO, "Connection closed")
         self.parent._onDisconnected()
         if self.reconnect:
-            self.parent._setUp()
+            if not self.parent.disconnecting:
+                self.parent._setUp()
 
     def defineCallbacks(self):
         @self.sio.event
