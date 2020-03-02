@@ -42,14 +42,16 @@ class PostRequest(object):
         """
         try:
             r = requests.post(self.url, data=self.data, **kwargs)
+            c = r.content
             r.raise_for_status()
             content =json.loads(r.content)            
             if self.callback:
                 self.callback(r.json())
         except Exception as e:
             if self.errBack:
-                self.errBack(e)
+                self.errBack((e, c))
             else:
+                print('Error in PostRequest: {}'.format(c))
                 raise(e)
 
     def send(self, blocking=False, **kwargs):

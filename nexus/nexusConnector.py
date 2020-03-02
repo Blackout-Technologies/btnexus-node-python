@@ -355,16 +355,17 @@ class NexusConnector(object):
         def connect():
             self.logger.log(self.parent.NEXUSINFO, 'connection established')
             self.isConnected = True
-            self.sio.emit('ping', {})
+            self.sio.emit('ping', {}) # TODO: remove
         
         @self.sio.on('btnexus-registration')
         def register(data):
+            print('trying to register') # TODO: remove!
             self.nodeId = data['nodeId']
             msg = Message("register")
             msg["token"] = self.token 
             msg["host"] = socket.gethostname()
             msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
-            msg["id"] = self.nodeId
+            msg["id"] = self.nodeId 
             msg["node"] = {}    #TODO: What should be in this field?
             self.publish(msg)
         

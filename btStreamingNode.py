@@ -20,6 +20,24 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
 class StreamingNode(Node):
 
+    def __init__(self, language=None, personalityId=None, integrationId=None, sessionId=None, **kwargs):
+        super(StreamingNode, self).__init__(**kwargs)
+        self.language = language
+        if self.language == None:
+            self.language = os.environ['LANGUAGE']
+        self.personalityId = personalityId
+        if self.personalityId == None:
+            self.personalityId = os.environ['PERSONALITYID']
+        self.integrationId = integrationId
+        if self.integrationId == None:
+            self.integrationId = os.environ['INTEGRATIONID']
+        self.sessionId = sessionId
+        if self.sessionId == None:
+            try:
+                self.sessionId = os.environ['SESSIONID']
+            except:
+                print('SessionId not set - will be set in the _setUp()')
+
     def connect(self, **kwargs):
         """
         connect the Axon and start the reactor for twisted. 
@@ -37,39 +55,36 @@ class StreamingNode(Node):
         Using the initKwargs or setting default values
         """
         self.transport = None
-        if 'language' in self.initKwargs:
-            self.language = self.initKwargs['language']
-        else:
-            self.language = 'en-US'
-        if 'personalityId' in self.initKwargs:
-            self.personalityId = self.initKwargs['personalityId']
-        else:
-            self.personalityId = os.environ["PERSONALITYID"] 
-        # self.msKey = os.environ["MSKEY"]
-        if 'integrationId' in self.initKwargs:
-            self.integrationId = self.initKwargs['integrationId']
-        else:
-            self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
+        # if 'language' in self.initKwargs:
+        #     self.language = self.initKwargs['language']
+        # else:
+        #     self.language = 'en-US'
+        # if 'personalityId' in self.initKwargs:
+        #     self.personalityId = self.initKwargs['personalityId']
+        # else:
+        #     self.personalityId = os.environ["PERSONALITYID"] 
+        # # self.msKey = os.environ["MSKEY"]
+        # if 'integrationId' in self.initKwargs:
+        #     self.integrationId = self.initKwargs['integrationId']
+        # else:
+        #     self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
         params = {
             'integrationId': self.integrationId,
             'personalityId': self.personalityId
         }
-        if 'sessionId' in self.initKwargs:
-            self.sessionId = self.initKwargs['sessionId']
-        else:
+        try:
+            print("reusing sessionId: {}".format(self.sessionId))
+        except AttributeError:
             try:
-                print("reusing sessionId: {}".format(self.sessionId))
-            except AttributeError:
+                print("URL: {}".format(self.axonURL))
+                BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
+            except Exception as e:
                 try:
-                    print("URL: {}".format(self.axonURL))
-                    BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
-                except Exception as e:
-                    try:
-                        self.publishError('Unable to get the sessionId: {}'.format(e))
-                    except:
-                        print('Unable to get the sessionId: {}'.format(e)) # if not connected just prints
-                    time.sleep(2) # sleep
-                    self._setUp()  # and retry
+                    self.publishError('Unable to get the sessionId: {}'.format(e))
+                except:
+                    print('Unable to get the sessionId: {}'.format(e)) # if not connected just prints
+                time.sleep(2) # sleep
+                self._setUp()  # and retry
 
         super(StreamingNode, self)._setUp()
 
