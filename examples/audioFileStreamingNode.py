@@ -45,7 +45,7 @@ class AudioFileStreamingNode(StreamingNode):
 
 if __name__ == '__main__':
     # asn = AudioFileStreamingNode(language='en-US', personalityId='18b50f0b-d966-6e5a-1fa1-b3a31e4fc428' , integrationId='randomIntegration' ,sessionId='abc123')
-    asn = AudioFileStreamingNode(packagePath='../tests/packageTest.json', rcPath='../../streaming-axon/speechIntegration/.btnexusrc')
+    asn = AudioFileStreamingNode(packagePath='../tests/packageIntegration.json', rcPath='../../streaming-axon/speechIntegration/.btnexusrc')
     asn.connect()
 
     

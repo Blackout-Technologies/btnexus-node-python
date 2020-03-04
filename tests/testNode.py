@@ -74,66 +74,20 @@ class NodeTests(unittest.TestCase):
         '''
         # read token from gitlab variables! and axonURL
         print('TESTING THE NODE')
-        node = TestNode()
+        node = TestNode(packagePath='packageIntegration.json')
         node.connect()
-
-    # def test_connect_rt_bt(self):
-    #     '''
-    #     Test the connect process of the Node
-    #     '''
-    #     # read token from gitlab variables! and axonURL
-    #     print('TESTING THE NODE')
-    #     node = TestNode()
-    #     node.connect(reconnection=True, blocking=True)
-    #     time.sleep(1)
-    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
-
-    # def test_connect_rf_bf(self):
-    #     '''
-    #     Test the connect process of the Node
-    #     '''
-    #     # read token from gitlab variables! and axonURL
-    #     print('TESTING THE NODE')
-    #     node = TestNode()
-    #     node.connect(reconnection=False, blocking=False)
-    #     time.sleep(1)
-    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
-    
-    # def test_connect_rf_bt(self):
-    #     '''
-    #     Test the connect process of the Node
-    #     '''
-    #     # read token from gitlab variables! and axonURL
-    #     print('TESTING THE NODE')
-    #     node = TestNode()
-    #     node.connect(reconnection=False, blocking=True)
-    #     time.sleep(1)
-    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
 
     # Making a real message_exchange test out of Ping/Pong - it fails if after n seconds not all pongs are collected.
     @timeout_decorator.timeout(600, use_signals=False)
     def test_message_exchange(self):
-        pong = Pong()
+        pong = Pong(packagePath='packageIntegration.json')
         pong.connect(blocking=False)
         for x in range(20):
-            ping = Ping()
+            ping = Ping(packagePath='packageIntegration.json')
             ping.connect(blocking=not bool(x % 5)) # every 5th Node is blocking
             print('Ping/Pong {} done'.format(x))
         pong.disconnect()
 
-    # @timeout_decorator.timeout(200, use_signals=False)
-    # def test_message_exchange_with_reconnection(self):
-    #     reconnectUtils.shakyInternet(120)
-    #     pong = Pong()
-    #     pong.connect(blocking=False)
-    #     for x in range(60):
-    #         ping = Ping()
-    #         ping.connect(blocking=True)#not bool(x % 5)) # every 5th Node is blocking
-    #         print('Ping/Pong {} done'.format(x))
-    #     pong.disconnect()
     
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import unittest
 from threading import Lock
 import time
 import os
+import json, base64
 
 
 # 3rd Party imports
@@ -21,13 +22,17 @@ class TestBTPostRequest(unittest.TestCase):
         self.looping = True
         self.errorMsg = False
         self.exception = None
-        self.token = os.environ["TOKEN"]
-        self.axon = os.environ["AXON_HOST"]
-        self.personalityId = os.environ["PERSONALITYID"]
-        self.integrationId = os.environ["INTEGRATIONID"]
-        print('Token: {}'.format(self.token))
-        print('url: {}'.format(self.axon))
+        connectHash = os.environ["CONNECT_HASH"]
+        self.config = json.loads(base64.b64decode(connectHash))
 
+        self.token = self.config['token']
+        self.axon = self.config['host']
+        self.applicationId = self.config['id']
+        self.applicationType = 'integration'
+        self.params =  {
+        'applicationId': self.applicationId,
+        'applicationType': self.applicationType
+        }
 
     def callback(self, response):
         """
@@ -53,13 +58,10 @@ class TestBTPostRequest(unittest.TestCase):
         test to send and btPostrequest and receive a response in a threaded fashion.
         '''
         print('TESTING THE threadedSendSessionAccessRequest')
-        params = {
-        'integrationId': self.integrationId,
-        'personalityId': self.personalityId
-        }
+        
 
         self.lock.acquire()
-        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.callback, errBack=self.errBack).send()
+        BTPostRequest('applicationAccessRequest', self.params, accessToken=self.token, url=self.axon, callback=self.callback, errBack=self.errBack).send()
         self.lock.acquire()
         if self.errorMsg:
             raise Exception(self.errorMsg)
@@ -71,11 +73,7 @@ class TestBTPostRequest(unittest.TestCase):
         test to send and btPostrequest and receive a response in a blocking fashion.
         '''
         print('TESTING THE blockingSendSessionAccessRequest')
-        params = {
-        'integrationId': self.integrationId,
-        'personalityId': self.personalityId
-        }
-        BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axon, callback=print).send(blocking=True, timeout=2)
+        BTPostRequest('applicationAccessRequest', self.params, accessToken=self.token, url=self.axon, callback=print).send(blocking=True, timeout=2)
 
 if __name__ == "__main__":
     unittest.main()

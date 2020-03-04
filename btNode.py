@@ -218,7 +218,7 @@ class Node(object):
         """
         self.publishError(error)
 
-    def onError(self, error):
+    def onError(self, error): # TODO: this needs to be implemented correctly
         """
         Handling of Errors. If not overloaded it just forwards the error to the nexusConnector which just prints and publishes it if possible
         """
@@ -271,7 +271,7 @@ class Node(object):
         except socketio.exceptions.ConnectionError as e: #reconnects on initial connect() if not connected to the internet
             timer = Timer(2.0, self.connect, kwargs=kwargs)
             timer.start() # This runs in a Thread and makes blocking=True invalid
-            self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axonURL))
+            self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.config['host']))
             timer.join()
 
     def disconnect(self):
@@ -294,6 +294,6 @@ if __name__ == '__main__':
         def onConnected(self):
             print('Hi')
     
-    test = Test(packagePath='./tests/packageTest.json')
+    test = Test(packagePath='./tests/packageIntegration.json')
     test.connect()
     print('I wasnt blocking')

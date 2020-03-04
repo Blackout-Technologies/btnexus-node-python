@@ -1,0 +1,27 @@
+{
+    "name": "test",
+    "title": "Test",
+    "description": "this is just a test",
+    "type": "integration",
+    "keywords": [
+        "test",
+        "testing"
+    ],
+    "version": "0.2.3",
+    "icon": "icon.png",
+    "banner": "banner.png",
+    "nexusVersion": "2.1.0",
+    "license": "See attached LICENSE file",
+    "scripts": {
+        "compress": "node ./node_modules/btnexus-hook/lib/compressForDelivery.js",
+        "upload": "node ./node_modules/btnexus-hook/lib/dispatchDelivery.js"
+    },
+    "author": {
+        "name": "Adrian Lubitz",
+        "url": "https://blackout.ai/",
+        "email": "al@blackout.ai"
+    },
+    "dependencies": {
+        "btnexus-hook": "2.2.7"
+    }
+ }
