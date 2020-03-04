@@ -52,22 +52,9 @@ class StreamingNode(Node):
 
     def _setUp(self):
         """
-        Using the initKwargs or setting default values
+        Setting up
         """
         self.transport = None
-        # if 'language' in self.initKwargs:
-        #     self.language = self.initKwargs['language']
-        # else:
-        #     self.language = 'en-US'
-        # if 'personalityId' in self.initKwargs:
-        #     self.personalityId = self.initKwargs['personalityId']
-        # else:
-        #     self.personalityId = os.environ["PERSONALITYID"] 
-        # # self.msKey = os.environ["MSKEY"]
-        # if 'integrationId' in self.initKwargs:
-        #     self.integrationId = self.initKwargs['integrationId']
-        # else:
-        #     self.integrationId = os.environ['INTEGRATIONID'] #"f0458d18-3108-11e9-b210-d663bd873d93" - This is the robot integrationId - this needs to be set correctly using env
         params = {
             'integrationId': self.integrationId,
             'personalityId': self.personalityId
@@ -185,6 +172,6 @@ class StreamingNode(Node):
                 print(e)
 
 if __name__ == '__main__':
-    asn = StreamingNode()
+    asn = StreamingNode(packagePath='./tests/packageTest.json', rcPath='../streaming-axon/speechIntegration/.btnexusrc')
     asn.connect()
     

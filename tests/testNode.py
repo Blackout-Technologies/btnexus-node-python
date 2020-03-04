@@ -7,7 +7,10 @@ import os
 
 # 3rd Party imports
 from btNode import Node
+import timeout_decorator
+
 # local imports
+from reconnectUtils import ShakyInternet
 # end file header
 __author__      = 'Adrian Lubitz'
 __copyright__   = 'Copyright (c)2017, Blackout Technologies'
@@ -28,17 +31,18 @@ class Ping(Node):
         self.sendPing()
 
     def sendPing(self):
-        print('send ping')
+        # print('send ping')
         try:
             self.publish(group='test', topic='test', funcName='ping', params={})
         except Exception as e: # Can happen, that one message is still beeing send although already disconnected
             print(e)
         if self.pongs < 10:
-            Timer(0.2, self.sendPing).start()
+            Timer(0.1, self.sendPing).start()
+        # 10 pings will be send in approx 1 second
 
     def pong(self):
         self.pongs += 1
-        print('Pongs: {}'.format(self.pongs))
+        # print('Pongs: {}'.format(self.pongs))
         if self.pongs >= 10:
             self.disconnect()
 
@@ -50,69 +54,87 @@ class Pong(Node):
         self.subscribe(group='test', topic='test', callback=self.ping)
 
     def ping(self):
-        print('sending pong')
+        # print('sending pong')
         self.publish(group='test', topic='test', funcName='pong', params={})
 
 
 class NodeTests(unittest.TestCase):
     '''Tests for the Node''' 
+    shakyInternet = ShakyInternet()
 
-    def test_connect_rt_bf(self):
+    def setUp(self):
+        self.shakyInternet.start()
+
+    def tearDown(self):
+        self.shakyInternet.stop()
+
+    def test_connect(self):
         '''
         Test the connect process of the Node
         '''
         # read token from gitlab variables! and axonURL
         print('TESTING THE NODE')
         node = TestNode()
-        node.connect(reconnection=True, blocking=False)
-        time.sleep(1)
-        assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-        assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
+        node.connect()
 
-    def test_connect_rt_bt(self):
-        '''
-        Test the connect process of the Node
-        '''
-        # read token from gitlab variables! and axonURL
-        print('TESTING THE NODE')
-        node = TestNode()
-        node.connect(reconnection=True, blocking=True)
-        time.sleep(1)
-        assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-        assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
+    # def test_connect_rt_bt(self):
+    #     '''
+    #     Test the connect process of the Node
+    #     '''
+    #     # read token from gitlab variables! and axonURL
+    #     print('TESTING THE NODE')
+    #     node = TestNode()
+    #     node.connect(reconnection=True, blocking=True)
+    #     time.sleep(1)
+    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
+    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
 
-    def test_connect_rf_bf(self):
-        '''
-        Test the connect process of the Node
-        '''
-        # read token from gitlab variables! and axonURL
-        print('TESTING THE NODE')
-        node = TestNode()
-        node.connect(reconnection=False, blocking=False)
-        time.sleep(1)
-        assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-        assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
+    # def test_connect_rf_bf(self):
+    #     '''
+    #     Test the connect process of the Node
+    #     '''
+    #     # read token from gitlab variables! and axonURL
+    #     print('TESTING THE NODE')
+    #     node = TestNode()
+    #     node.connect(reconnection=False, blocking=False)
+    #     time.sleep(1)
+    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
+    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
     
-    def test_connect_rf_bt(self):
-        '''
-        Test the connect process of the Node
-        '''
-        # read token from gitlab variables! and axonURL
-        print('TESTING THE NODE')
-        node = TestNode()
-        node.connect(reconnection=False, blocking=True)
-        time.sleep(1)
-        assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
-        assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
+    # def test_connect_rf_bt(self):
+    #     '''
+    #     Test the connect process of the Node
+    #     '''
+    #     # read token from gitlab variables! and axonURL
+    #     print('TESTING THE NODE')
+    #     node = TestNode()
+    #     node.connect(reconnection=False, blocking=True)
+    #     time.sleep(1)
+    #     assert not node.nexusConnector.isConnected, 'disconnect is not completed [isConnected]'
+    #     assert not node.nexusConnector.isRegistered, 'disconnect is not completed [isRegistered]'
 
-    # TODO: Make a real message_exchange test out of this Ping/Pong - it needs to fail if after n seconds not all pongs are collected.
-    # def test_message_exchange(self):
+    # Making a real message_exchange test out of Ping/Pong - it fails if after n seconds not all pongs are collected.
+    @timeout_decorator.timeout(600, use_signals=False)
+    def test_message_exchange(self):
+        pong = Pong()
+        pong.connect(blocking=False)
+        for x in range(20):
+            ping = Ping()
+            ping.connect(blocking=not bool(x % 5)) # every 5th Node is blocking
+            print('Ping/Pong {} done'.format(x))
+        pong.disconnect()
+
+    # @timeout_decorator.timeout(200, use_signals=False)
+    # def test_message_exchange_with_reconnection(self):
+    #     reconnectUtils.shakyInternet(120)
     #     pong = Pong()
     #     pong.connect(blocking=False)
-    #     for x in range(55):
+    #     for x in range(60):
     #         ping = Ping()
-    #         ping.connect()
+    #         ping.connect(blocking=True)#not bool(x % 5)) # every 5th Node is blocking
+    #         print('Ping/Pong {} done'.format(x))
     #     pong.disconnect()
+    
 
 if __name__ == "__main__":
     unittest.main()        

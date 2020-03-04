@@ -40,19 +40,20 @@ class PostRequest(object):
         """
         sending the request and trigger the callback when response is ready - this is blocking
         """
+        c = None
         try:
             r = requests.post(self.url, data=self.data, **kwargs)
             c = r.content
             r.raise_for_status()
-            content =json.loads(r.content)            
-            if self.callback:
+            # content =json.loads(r.content)            
+            if self.callback: # TODO: move out of try?
                 self.callback(r.json())
         except Exception as e:
             if self.errBack:
                 self.errBack((e, c))
             else:
-                print('Error in PostRequest: {}'.format(c))
-                raise(e)
+                print('Error in PostRequest: [{}]{}, {}'.format(type(e), e, c))
+                # raise(e)
 
     def send(self, blocking=False, **kwargs):
         """

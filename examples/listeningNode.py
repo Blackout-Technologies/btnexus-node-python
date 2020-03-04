@@ -48,8 +48,5 @@ class ListeningNode(Node):
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    token = os.environ["TOKEN"]
-    axon = os.environ["AXON_HOST"]
-    debug = "NEXUS_DEBUG" in os.environ
-    listeningNode = ListeningNode(token, axon, debug)
+    listeningNode = ListeningNode()
     listeningNode.connect() # This call is blocking

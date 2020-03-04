@@ -10,6 +10,7 @@ run_tests3.6:
   stage: test
   script:
     - pip install .
+    - pip install -r testRequirements.txt
     - cd tests
     - python -m unittest discover -s .
 
@@ -18,6 +19,7 @@ run_tests2.7:
   stage: test
   script:
     - pip install .
+    - pip install -r testRequirements.txt
     - cd tests
     - python -m unittest discover -s .
 
