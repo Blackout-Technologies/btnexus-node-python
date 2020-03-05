@@ -172,6 +172,6 @@ class StreamingNode(Node):
                 print(e)
 
 if __name__ == '__main__':
-    asn = StreamingNode(packagePath='./tests/packageTest.json', rcPath='../streaming-axon/speechIntegration/.btnexusrc')
+    asn = StreamingNode(packagePath='./tests/packageIntegration.json', rcPath='../streaming-axon/speechIntegration/.btnexusrc')
     asn.connect()
     
