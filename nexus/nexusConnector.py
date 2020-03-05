@@ -17,6 +17,7 @@ from threading import Thread
 
 # 3rd party imports
 import socketio
+from btPostRequest import BTPostRequest
 
 # local imports
 # from .btWebsocket import *
@@ -34,7 +35,7 @@ class NexusConnector(object):
     version = "4.0"
     
 
-    def __init__(self, connectCallback, parent,  token,  axonURL,  debug, logger):
+    def __init__(self, connectCallback, parent,  token,  axonURL, applicationId, applicationType, debug, logger):
         """
         Sets up all configurations.
 
@@ -53,15 +54,15 @@ class NexusConnector(object):
         """
         #Set env for certs if not set
         os.environ["WEBSOCKET_CLIENT_CA_BUNDLE"] = certifi.where()
-        self.debugTopic = "ai.blackout.debug"
-        self.warningTopic = "ai.blackout.warning"
-        self.errorTopic = "ai.blackout.error"
         self.parent = parent
         self.parentName = self.parent.nodeName
         self.nodeId = None #str(uuid.uuid4())
         # self.protocol = "wss" 
         self.token = token
         self.axon = axonURL
+        self.applicationId = applicationId
+        self.applicationType = applicationType
+        self.rootTopic = "ai.blackout."
 
         if not '://' in self.axon:
             raise NoProtocolException(self.axon)
@@ -96,13 +97,12 @@ class NexusConnector(object):
         :type msg: Message
         """
         try:
-            topic = msg["topic"].replace("ai.blackout.", "")
-            callbackName = list(msg["payload"].keys())[0]
+            topic = msg["topic"].replace(self.rootTopic, "")
+            callbackName = list(msg["payload"].keys())[0] # here we could also think about running more than one callback
             params = msg["payload"][callbackName]
             group = msg["group"]
             if callbackName in self.callbacks[group][topic].keys():
                 Thread(target=self.executeCallback, args=(group, topic, callbackName, params)).start()
-                #self.executeCallback(group, topic, callbackName, params)
             else:
                 error = NoCallbackFoundException("Callback {} doesn't exist in node {} on topic {} in group {}".format(callbackName, self.parentName, topic, group))
                 self.publishDebug(str(error))
@@ -132,13 +132,7 @@ class NexusConnector(object):
         else:
             self.publishError("Parameters can either be given as a list or a keywordDict.")
             return
-
-        reply = Message("publish")
-        reply["payload"] = {callbackName + "_response":{"orignCall":callbackName ,"originParams":params, "returnValue": retVal}}
-        reply["topic"] = "ai.blackout." + topic
-        reply["group"] = group
-        reply["host"] = socket.gethostname()
-        self.publish(reply)
+        self.publish(group=group, topic=topic, funcName=callbackName + "_response", params={"orignCall":callbackName ,"originParams":params, "returnValue": retVal})
 
     def setDebugMode(self, mode):
         """
@@ -146,7 +140,7 @@ class NexusConnector(object):
         """
         self.debug = mode
 
-    def listen(self, blocking = True, **kwargs): # TODO: is it possible to use kwargs twice? - for init() and connect()?
+    def listen(self, blocking = True, **kwargs): 
         """Start listening on Websocket communication"""
         # SSLOPTS
         ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
@@ -155,24 +149,7 @@ class NexusConnector(object):
         self.defineCallbacks()
         self.sio.connect(self.axon)
         if blocking:
-            self.sio.wait() # This waits until disconnect!?!?
-
-        # _reconnect = True
-        # while(_reconnect):
-        #     _reconnect = self.reconnect # Do While
-        #     try:
-        #         self.sio.connect(self.axon)
-        #         if blocking:
-        #             self.sio.wait() # This waits until disconnect!?!?
-        #             print('back in the reconnect loop')
-        #         else:
-        #             break #this will never be reached if wait() is used
-        #     except socketio.exceptions.ConnectionError as e:
-        #         if self.reconnect:
-        #             self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axon.split('/')[0]))
-        #             time.sleep(5)
-        #         else:
-        #             raise e
+            self.sio.wait() # This waits until disconnect
 
     def disconnect(self):
         """
@@ -188,9 +165,13 @@ class NexusConnector(object):
         :param group: Name of the group
         :type group: String
         """
-        join = Message("join")
-        join["groupName"] = group
-        self.publish(join)
+        if not group in self.callbacks:
+            if self.isRegistered:
+                join = Message(intent="join", group=group)
+                self.sio.emit('btnexus-join', join.getJsonContent())
+                self.callbacks[group] # Because this is a defaultdict only trying to access the group creates a dafaultdict(dict) for this key
+            else:
+                self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't join - not registered!".format(self.parentName))
 
     def leave(self, group):
         """
@@ -199,9 +180,11 @@ class NexusConnector(object):
         :param group: Name of the group
         :type group: String
         """
-        leave = Message('leave')
-        leave["groupName"] = group
-        self.publish(leave)
+        if self.isRegistered:
+            leave = Message('leave', group=group)
+            self.sio.emit('btnexus-leave', leave.getJsonContent())
+        else:
+            self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't leave - not registered!".format(self.parentName))
 
     def subscribe(self, group, topic, callback, funcName = None):
         """
@@ -218,14 +201,10 @@ class NexusConnector(object):
         """
         if not self.isConnected:
             raise NexusNotConnectedException()
-        if group not in self.callbacks:
-            self.join(group)
-        if topic not in self.callbacks[group]: #first subscribtion
-            sub = Message("subscribe")
-            sub["topic"] = "ai.blackout.{}".format(topic)
-            self.publish(sub)
+        self.join(group)
         if funcName == None:
             funcName = callback.__name__
+        self.sio.on(self.rootTopic + topic, self.onMessage)
         self.callbacks[group][topic][funcName] = callback
 
     def unsubscribe(self, group, topic):
@@ -239,19 +218,35 @@ class NexusConnector(object):
         """
         self.callbacks[group][topic] = {}
 
-    def publish(self, message):
+    def publish(self, group, topic, funcName, params):
         """
-        Publish a message on the btNexus
+        publishes a Message with the payload(funcName and params) to a topic.
 
-        :param message: A Message to send into the btNexus
-        :type message: Message
+        :param group: Name of the group
+        :type group: String
+        :param topic: Name of the topic
+        :type topic: String
+        :param funcName: Name of the function.
+        :type funcName: String
+        :param params: The parameters for the callback
+        :type params: List or keywordDict
         """
         # Add the node id as a source to that this node does not receive its own
         # messages
 
-        message['nodeId'] = self.nodeId
-        if self.isConnected:
-            self.sio.emit('message', message.getJsonContent())
+
+        if type(params) == list or type(params) == dict:
+            pass
+        else:
+            self.publishError("params needs to be a list of parameters or keywordDict. Is of type {}".format(str(type(params))))
+            return
+        self.join(group)
+        info = Message(intent="publish", group=group, topic=self.rootTopic + topic)
+        info["payload"] = {funcName:params}
+        info["host"] = socket.gethostname()
+        info['nodeId'] = self.nodeId
+        if self.isConnected and self.isRegistered:
+            self.sio.emit('btnexus-publish', info.getJsonContent())
         else:
             raise NexusNotConnectedException()
 
@@ -264,12 +259,7 @@ class NexusConnector(object):
         """
         if self.debug:
             self.logger.debug(debug)
-            deb = Message("publish")
-            deb["group"] = "blackout-global"
-            deb["topic"] = self.debugTopic
-            deb["payload"] = {"debug":debug}
-            self.publish(deb)
-
+            self.publish('blackout-global', 'debug', 'debug', [debug])
 
     def publishWarning(self, warning):
         """
@@ -279,11 +269,7 @@ class NexusConnector(object):
         :type warning: String
         """
         self.logger.warning(warning)
-        warn = Message("publish")
-        warn["group"] = "blackout-global"
-        warn["topic"] = self.warningTopic
-        warn["payload"] = {"warning":warning}
-        self.publish(warn)
+        self.publish('blackout-global', 'warning', 'warning', [warning])
 
     def publishError(self, error):
         """
@@ -293,11 +279,8 @@ class NexusConnector(object):
         :type error: String
         """
         self.logger.error(error)
-        err = Message("publish")
-        err["group"] = "blackout-global"
-        err["topic"] = self.errorTopic
-        err["payload"] = {"error":error}
-        self.publish(err)
+        self.publish('blackout-global', 'error', 'error', [error])
+    
 
     def onMessage(self, message):
         """
@@ -307,38 +290,14 @@ class NexusConnector(object):
         :type message: String
         """
         msg = Message()
-        msg.loadFromJsonString(message)
-        if( msg["api"]["intent"] == "registerSuccess" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Registered successfully".format(self.parentName))
-            self.isRegistered = True
-            self.__onConnected()
-            #TODO: check here for versionmissmatch - just like in java
-        elif ( msg["api"]["intent"] == "registerFailed" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Register failed with reason: {}".format(self.parentName, msg["reason"]))
-        elif( msg["api"]["intent"] == "subscribeSuccess" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Subscribed to: {}".format(self.parentName, msg["topic"]))
-        elif ( msg["api"]["intent"] == "subscribeFailed" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to Subscribed to: {}".format(self.parentName, msg["topic"]))
-        elif ( msg["api"]["intent"] == "joinSuccess" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Joined Group: {}".format(self.parentName, msg["groupName"]))
-        elif ( msg["api"]["intent"] == "joinFailed" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to join Group: {}".format(self.parentName, msg["groupName"]))
-        elif ( msg["api"]["intent"] == "leaveSuccess" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Left Group: {}".format(self.parentName, msg["groupName"]))
-        elif ( msg["api"]["intent"] == "leaveFailed" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to leave Group: {}".format(self.parentName, msg["groupName"]))
-        elif ( msg["api"]["intent"] == "unsubscribeSuccess" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Unsubscribed from topic: {}".format(self.parentName, msg["topic"]))
-        elif ( msg["api"]["intent"] == "unsubscribeFailed" ):
-            self.logger.log(self.parent.NEXUSINFO, "[{}]: Failed to unsubscribe from topic: {}".format(self.parentName, msg["topic"]))
-        else:
-            # Interaction is only allowed with registered nodes
-            if( self.isRegistered ):
-                try:
-                    # Call topic callback with this message
-                    self.callbackManager(msg)
-                except Exception:
-                    self.publishError(traceback.format_exc())
+        msg.loadFromJson(message)
+
+        if( self.isRegistered ):
+            try:
+                # Call topic callback with this message
+                self.callbackManager(msg)
+            except Exception:
+                self.publishError(traceback.format_exc())
 
     def onDisconnected(self):
         self.callbacks = defaultdict(lambda: defaultdict(dict))
@@ -350,28 +309,54 @@ class NexusConnector(object):
             if not self.parent.disconnecting:
                 self.parent._setUp()
 
+    def setSessionId(self, response):
+        if response['success']:
+            self.nodeId = self.registerData['nodeId'] 
+            sessionId = response['sessionId']
+            msg = Message("register")
+            msg["sessionId"] = sessionId 
+            msg["host"] = socket.gethostname()
+            msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
+            msg["id"] = self.nodeId
+            msg["node"] = {}    #TODO: What should be in this field?
+            self.sio.emit('btnexus-registration', msg.getJsonContent())
+        else:
+            try:
+                self.publishError('Error getting sessionId: {}\t - retrying in 2 seconds'.format(response['error']))
+            except NexusNotConnectedException:
+                pass # just log the error if not connected which is likely, because can only connect with sessionId
+            except KeyError:
+                self.publishError('SessionAccessRequest response in wrong format: {}'.format(response))
+            except Exception as e:
+                self.publishError(str(e))
+            time.sleep(2)
+            self.getSessionId()
+    
+    def getSessionId(self):
+        params = {
+                'applicationId': self.applicationId,
+                'applicationType': self.applicationType
+                }
+        BTPostRequest('applicationAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.setSessionId).send() # TODO: add Errback 
+
     def defineCallbacks(self):
         @self.sio.event
         def connect():
             self.logger.log(self.parent.NEXUSINFO, 'connection established')
             self.isConnected = True
-            self.sio.emit('ping', {}) # TODO: remove
         
         @self.sio.on('btnexus-registration')
         def register(data):
-            print('trying to register') # TODO: remove!
-            self.nodeId = data['nodeId']
-            msg = Message("register")
-            msg["token"] = self.token 
-            msg["host"] = socket.gethostname()
-            msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
-            msg["id"] = self.nodeId 
-            msg["node"] = {}    #TODO: What should be in this field?
-            self.publish(msg)
-        
-        @self.sio.on('message')
-        def onMessage(data):
-            self.onMessage(data)
+            self.registerData = data
+            if data['api']['intent'] == 'requestRegistration':
+                self.getSessionId()
+            elif data['api']['intent'] == 'registrationResult':
+                if data['success']:
+                    self.isRegistered = True
+                    self.__onConnected()
+                else:
+                    self.isRegistered = False
+                    self.logger.error("[{}]: Failed to register to the axon: {}".format(self.parentName, data["error"]))                
 
         @self.sio.event
         def connect_error():
@@ -380,10 +365,6 @@ class NexusConnector(object):
         @self.sio.event
         def disconnect():
             self.onDisconnected()
-        
-        # @self.sio.event
-        # def reconnect():
-        #     pass
 
 
         @self.sio.on('pong')

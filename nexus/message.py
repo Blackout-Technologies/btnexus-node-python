@@ -1,7 +1,7 @@
 """Messages that obey the blackout protocol, can use this class"""
 
 # System imports
-import json, time, copy, uuid, collections, yaml
+import json, time, copy, uuid, collections, yaml, warnings
 
 # 3rd party imports
 
@@ -13,12 +13,10 @@ class Message(object):
     """
         Protocol Message object
     """
-    data = {}           # Local Data array
-    valid = False       # Validation
 
     version = "5.0"   # Protocol version number
 
-    def __init__(self, intent=None):
+    def __init__(self, intent=None, group=None, topic=None): # TODO: add group and topic here! you will almost always need them 
         """
             Construct, Initialize the message
         """
@@ -33,6 +31,10 @@ class Message(object):
             self.data['api']['intent'] = intent
             self.data['api']['id'] = str(uuid.uuid4())
             self.valid = True
+        if group:
+            self.data['group'] = group
+        if topic:
+            self.data['topic'] = topic
 
     def loadFromJson(self, jsonData):
         """
@@ -40,8 +42,8 @@ class Message(object):
         """
         # Load existing message
         self.data = jsonData
-        #self.validate() #TODO: commented out for the moment
-        self.valid = True
+        self.validate() 
+        # self.valid = True
 
     def loadFromJsonString(self, jsonData):
         """
@@ -49,8 +51,8 @@ class Message(object):
         """
         # Load existing message
         self.data = yaml.safe_load(jsonData)
-        # self.validate() #TODO: commented out for the moment
-        self.valid = True
+        self.validate() 
+        # self.valid = True
 
 
     def addAuthHeader(self, authType, authValue):
@@ -71,21 +73,18 @@ class Message(object):
 
     def validate(self):
         """
-            Validate message content
+        Validate message content
         """
-
         protocolVersion = self.data['api']['version']
-        # TODO should be fixed with semver, w/ down compatibility
-        #if( protocolVersion != self.version ):
-        #    # Version missmatch
-        #    if( protocolVersion[0] != self.version[0]):
-        #        # Major version missmatch
-        #        raise Exception("Major version missmatch {} != {}".format(protocolVersion[0], self.version[0]))
-        #        return
-        #    else:
-        #        raise Exception("Minor version missmatch")
-
-        self.valid = True
+        if( protocolVersion != self.version ):
+            # Version missmatch
+            if( protocolVersion[0] != self.version[0]):
+                # Major version missmatch
+                warnings.warn("Major version missmatch {} != {}".format(protocolVersion[0], self.version[0]), Warning)
+                self.valid = False
+            else:
+                warnings.warn("Minor version missmatch", Warning)
+                self.valid = True
 
 
     def stripHeader(self):

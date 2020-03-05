@@ -15,8 +15,7 @@ else:
 from btNode import Node # have it like this so it will still be possible to seperate it into its own package
 
 # local imports
-from nexus.btNexusMemory import BTNexusMemory
-from nexus.btNexusData import BTNexusData
+
 from nexus.btCaptions import BTCaptions
 
 
@@ -29,46 +28,15 @@ class Hook(Node):
     """
     Blackout Nexus hook. Base class for all hooks
     """
-    def __init__(self, connectHash = None, **kwargs):
+    def __init__(self, **kwargs):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
         (either given as parameter, via environment variable CONNECT_HASH or in the .btnexusrc(prioritized in this order))
         """
-        configpath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+        super(Hook, self).__init__(**kwargs)
         captionsPath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'captions.json')
-        with open(configpath) as jsonFile:
-            self.version = json.load(jsonFile)["version"]
-
         self.captions = BTCaptions(captionsPath) # TODO: add some docstring to be visibile in the docu
-
-        #get connectHash
-        self.initKwargs = kwargs
-        if connectHash == None:
-            if "CONNECT_HASH" in os.environ:
-                connectHash = os.environ["CONNECT_HASH"]
-            else:
-                with open(".btnexusrc") as btnexusrc:
-                    connectHash = btnexusrc.read()
-
-        #extract config
-        self.config = json.loads(base64.b64decode(connectHash))
-
-        #call super constructor with axon and token set
-        try:
-            print('getting HASHVERSION')
-            self.connectHashVersion = self.config['version']
-        except KeyError:
-            warnings.warn("You are using a deprecated version of the connect hash.", DeprecationWarning) #Apperently DeprecationWarnings are ignored for some reason
-
-        self.token = self.config["token"]
-        self.host = self.config["host"]
-
-        self.memory = BTNexusMemory(self.host, self.token)
-        self.data = BTNexusData(self.host, self.token, self.config['id'])
-        super(Hook, self).__init__(self.token, self.host)
-        self.onInit(**kwargs)
-        self.connect(**kwargs)
 
     def getCaption(self, lang, key):
         """
@@ -81,7 +49,8 @@ class Hook(Node):
         """
         return self.captions.getPhrase(lang, key)
 
-    def onConnected(self):
+
+    def _onConnected(self):
         """
         Setup all Callbacks
         """
@@ -92,9 +61,7 @@ class Hook(Node):
         self.subscribe(self.config["id"], "state", self.state)
         self.readyState = "ready"
         self.state()
-
-        self.onReady(**self.initKwargs)
-
+        super(Hook, self)._onConnected()
 
 
     def state(self):
@@ -157,43 +124,26 @@ class Hook(Node):
         peer["message"] = message
         self.publish(peer["personalityId"], 'chat', 'hookResponse', peer)
 
-
-
-    def onReady(self, **kwargs):
-        """
-        Initilize what you need after the hook connected - you can pass kwargs in the constructor to use them here
-        """
-        if kwargs:
-            print("onReady with params: {}".format(kwargs))
-    
-    def onInit(self, **kwargs):
-        """
-        Initilize what you need before the hook connected - you can pass kwargs in the constructor to use them here
-        """
-        if kwargs:
-            print("onInit with params: {}".format(kwargs))
-
-
     def _setUp(self):
         """
         Register the hook in the system
         """
-        super(Hook, self)._setUp()
         self.memoryData = {
                 'service': "hook",
                 'context': self.config['id'],
                 'version': self.version  
                 }
+        super(Hook, self)._setUp()
         
 
     def _onDisconnected(self):
         """
         Unregister the hook and send exit state
         """
-        super(Hook, self)._onDisconnected()
         self.memory.removeEvent(self.memoryData)
         self.readyState = 'exit'
         # self.state() # TODO: this cant work - how should the state be sent if the Hook is no longer connected...?
+        super(Hook, self)._onDisconnected()
 
     def save(self, key, value, callback=None):
         """

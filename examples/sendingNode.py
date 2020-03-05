@@ -70,8 +70,5 @@ class SendingNode(Node):
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    token = os.environ["TOKEN"]
-    axon = os.environ["AXON_HOST"]
-    debug = "NEXUS_DEBUG" in os.environ
-    sendingNode = SendingNode(token, axon, debug)
+    sendingNode = SendingNode() # CONNECT_HASH needs to be in .btnexusrc or environment variable CONNECT_HASH
     sendingNode.connect() # This call is blocking

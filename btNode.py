@@ -10,6 +10,9 @@ import inspect
 import os
 from inspect import getmembers, isroutine
 from threading import Timer
+import base64
+import warnings
+
 
 
 # 3rd Party imports
@@ -18,6 +21,8 @@ from threading import Timer
 # local imports
 from nexus.nexusConnector import *
 from nexus.message import *
+from nexus.btNexusMemory import BTNexusMemory
+from nexus.btNexusData import BTNexusData
 
 # end file header
 __author__      = "Marc Fiedler"
@@ -34,7 +39,7 @@ class Node(object):
             record.levelname = 'NEXUSINFO'   
         return '[{}] {} - {} : {}'.format(record.levelname, record.name, record.created, record.msg)
 
-    def __init__(self, token=None,  axonURL=None,  debug=None, logger=None, **kwargs):
+    def __init__(self, connectHash=None, packagePath=None, rcPath=None, logger=None, debug=None):
         """
         Constructor sets up the NexusConnector.
 
@@ -44,19 +49,55 @@ class Node(object):
         :type axonURL: String
         :param debug: switch for debug messages
         :type debug: bool
+
+        :param logger: a logger object to log to 
+        :type logger: Logger
+        :param personalityId: Id of your Personality
+        :type personalityId: String
+        :param integrationId: Id of the integration this Node belongs to
+        :type integrationId: String
         """
-        self.disconnecting = False
-        self.token = token
-        if self.token == None:
-            self.token = os.environ["TOKEN"]
-        self.axonURL = axonURL
-        if self.axonURL == None:
-            self.axonURL = os.environ["AXON_HOST"]
+        if connectHash == None:
+            if "CONNECT_HASH" in os.environ:
+                connectHash = os.environ["CONNECT_HASH"]
+            else:
+                rcPath = rcPath if rcPath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc')
+                with open(rcPath) as btnexusrc:
+                    connectHash = btnexusrc.read()
+
+        self.config = json.loads(base64.b64decode(connectHash))
+
+        try:
+            self.connectHashVersion = self.config['version']
+        except KeyError:
+            warnings.warn("You are using a deprecated version of the connect hash.", DeprecationWarning) #Apperently DeprecationWarnings are ignored for some reason
+
+
+        
+        packagePath = packagePath if packagePath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+
+        with open(packagePath) as jsonFile:
+            self.package = json.load(jsonFile)
+
+
+
+        self.version = self.package['version']
+
+        self.memory = BTNexusMemory(self.config['host'], self.config['token'])
+        self.data = BTNexusData(self.config['host'], self.config['token'], self.config['id'])
+        
+        self.disconnecting = False        
+        
         if debug == None:
-            self.debug = "NEXUS_DEBUG" in os.environ
+            if 'NEXUS_DEBUG' in os.environ:
+                self.debug = True
+            elif 'debug' in self.package:
+                self.debug = self.package['debug']
+            else:
+                self.debug = False
         else:
             self.debug = debug
-
+        
         self.nodeName = self.__class__.__name__
         # if not self.axonURL.endswith("/"):
         #     self.axonURL += "/"
@@ -84,9 +125,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(self._onConnected, self, self.token, self.axonURL, self.debug, self.logger)
-        print('NODE saves these kwargs: {}'.format(kwargs))
-        self.initKwargs = kwargs
+        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger)
 
     def linkModule(self, module,group, topic):
         """
@@ -138,24 +177,7 @@ class Node(object):
         :param params: The parameters for the callback
         :type params: List or keywordDict
         """
-        # if type(topic) != str:
-        #     self.publishError("Topic needs to be a String. Is of type {}".format(type(topic)))
-        #     return
-        # if type(funcName) != str:
-        #     self.publishError("FuncName needs to be a String. Is of type {}".format(type(funcName)))
-        #     return
-        if type(params) == list or type(params) == dict:
-            pass
-        else:
-            self.publishError("params needs to be a list of parameters or keywordDict. Is of type {}".format(str(type(params))))
-            return
-
-        info = Message("publish")
-        info["topic"] = "ai.blackout." + topic
-        info["payload"] = {funcName:params}
-        info["host"] = socket.gethostname()
-        info["group"] = group
-        self.nexusConnector.publish(info)
+        self.nexusConnector.publish(group, topic, funcName, params)
 
     def publishDebug(self, debug):
         """
@@ -196,7 +218,7 @@ class Node(object):
         """
         self.publishError(error)
 
-    def onError(self, error):
+    def onError(self, error): # TODO: this needs to be implemented correctly
         """
         Handling of Errors. If not overloaded it just forwards the error to the nexusConnector which just prints and publishes it if possible
         """
@@ -208,8 +230,7 @@ class Node(object):
         This needs to be overloaded to subscribe to messages.
         """
         if self.debug:
-            self.logger.warning("You are using deprecated method nodeConnected(). You should use onConnected()")
-        self.nodeConnected()
+            self.logger.warning("Node is an abstract super class you need to overwrite onConnected.")
     def _onConnected(self):
         """This is used in classes that are base classes. It enables you to support the callback in a clean way without calling super. Therefore you need to call super here."""
         self.onConnected()
@@ -248,8 +269,10 @@ class Node(object):
             self._setUp() 
             self.nexusConnector.listen(**kwargs)
         except socketio.exceptions.ConnectionError as e: #reconnects on initial connect() if not connected to the internet
-            Timer(2.0, self.connect, kwargs=kwargs).start()
-            self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.axonURL))
+            timer = Timer(2.0, self.connect, kwargs=kwargs)
+            timer.start() # This runs in a Thread and makes blocking=True invalid
+            self.logger.error(str(e) + " - make sure you are connected to the Internet and the Axon on {} is running".format(self.config['host']))
+            timer.join()
 
     def disconnect(self):
         """
@@ -265,3 +288,12 @@ class Node(object):
         if self.debug:
             self.logger.warning("You are using deprecated method run(). You should use connect()")
         self.connect()
+
+if __name__ == '__main__':
+    class Test(Node):
+        def onConnected(self):
+            print('Hi')
+    
+    test = Test(packagePath='./tests/packageIntegration.json')
+    test.connect()
+    print('I wasnt blocking')
