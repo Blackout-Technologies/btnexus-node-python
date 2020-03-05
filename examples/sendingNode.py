@@ -70,6 +70,5 @@ class SendingNode(Node):
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-
-    sendingNode = SendingNode()
+    sendingNode = SendingNode() # CONNECT_HASH needs to be in .btnexusrc or environment variable CONNECT_HASH
     sendingNode.connect() # This call is blocking

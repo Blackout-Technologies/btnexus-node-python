@@ -48,5 +48,5 @@ class ListeningNode(Node):
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    listeningNode = ListeningNode()
+    listeningNode = ListeningNode() # CONNECT_HASH needs to be in .btnexusrc or environment variable CONNECT_HASH
     listeningNode.connect() # This call is blocking
