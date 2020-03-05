@@ -7,8 +7,8 @@
 |Author|Adrian Lubitz|
 |Author|Marc Fiedler|
 |Email|dev@blackout.ai|
-|Latest stable version|4.0|
-|Required Axon versions| >= 4.0.0|
+|Latest stable version|5.0|
+|Required Instance versions| >= 2.2|
 |Runs on|Python 2.7+ or Python 3.6+|
 |State|`Stable`|
 
@@ -29,13 +29,32 @@ pip install btnexus-node-python==[VERSION]
 # API Documentation
 You find an API Documentation our [GitHub Page](https://blackout-technologies.github.io/btnexus-node-python)
 
-# VERSION 4
-Version 4 changed the protocol to [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** 
+# Changelog
+* Since Version 4 the protocol was changed to completely use [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** *(Instance Version 2.2)*
+* Since Version 5, Nodes and all inheriting classes (Hooks, Integrations) use a `CONNECT_HASH` which can be obtained from the Instance and should be given in the file `.btnexusrc` or the environment variable `CONNECT_HASH` *(The latter overwrites the first)*. Additionally a `package.json` file is needed. It should be minimal the following:
+
+    ```json
+    {
+        "name": "test",
+        "title": "Test",
+        "description": "This is just a test",
+        "type": "integration",
+        "keywords": [
+            "test",
+            "testing"
+        ],
+        "version": "0.2.3",
+        "nexusVersion": "2.2",
+        "license": "See attached LICENSE file",
+        "author": {
+            "name": "Adrian Lubitz",
+            "url": "https://blackout.ai/",
+            "email": "al@blackout.ai"
+        }
+    }
+    ```
 
 
-# Known Issues
-Since Version 3.1 Node automatically reconnect on an Error. That means any occurring error causes a reconnect. **KeyboardInterupt is an Error. If you want to terminate your script use `ctrl + Alt Gr + \`**
-*This is solved in Version 4+*
 
 # Introduction
 
@@ -135,15 +154,17 @@ class SendingNode(Node):
         """
         super(SendingNode, self).cleanUp()
         self.shouldRun = False
-        self.thread.join()
+        try:
+            self.thread.join()
+        except AttributeError:
+            pass # This only happens if onConnected was never called before - Node was never connected correctly and therefore closes the connection and calls the cleanUp
+
 
 if( __name__ == "__main__" ):
     #Here you initialize your Node and run it.
-    token = os.environ["TOKEN"]
-    axon = os.environ["AXON_HOST"]
-    debug = "NEXUS_DEBUG" in os.environ
-    sendingNode = SendingNode(token, axon, debug)
+    sendingNode = SendingNode() # CONNECT_HASH needs to be in .btnexusrc or environment variable CONNECT_HASH
     sendingNode.connect() # This call is blocking
+
 
 ```
 The ListeningNode and all further examples can be seen in the examples folder.
@@ -155,4 +176,4 @@ Nodes should be small and serve only one purpose.
 To implement your own Node you need to inherit from the Node class,
 implement your callbacks and if you are actively doing something implement your
 Threads, that for example read in sensor data. See the examples to get started ;)
-Keep in mind, that you need to set the environment variables `AXON_HOST`, `TOKEN` and if you want `NEXUS_DEBUG` for the examples. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).
+Keep in mind, that you need to set the `CONNECT_HASH` in your `.btnexusrc` or the environment variable `CONNECT_HASH`. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).
