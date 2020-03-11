@@ -105,7 +105,7 @@ class NexusConnector(object):
                 Thread(target=self.executeCallback, args=(group, topic, callbackName, params)).start()
             else:
                 error = NoCallbackFoundException("Callback {} doesn't exist in node {} on topic {} in group {}".format(callbackName, self.parentName, topic, group))
-                self.publishDebug(str(error))
+                self.logger.debug(str(error))
                 return error
         except Exception as e:
             error = NoCallbackFoundException(str(e))
@@ -258,7 +258,7 @@ class NexusConnector(object):
         :type debug: String
         """
         if self.debug:
-            self.logger.debug(debug)
+            self.logger.log(self.parent.NEXUSINFO, debug)
             self.publish('blackout-global', 'debug', 'debug', [debug])
 
     def publishWarning(self, warning):
@@ -332,12 +332,18 @@ class NexusConnector(object):
             time.sleep(2)
             self.getSessionId()
     
-    def getSessionId(self):
+    def getSessionId(self, error = None):
         params = {
                 'applicationId': self.applicationId,
                 'applicationType': self.applicationType
                 }
-        BTPostRequest('applicationAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.setSessionId).send() # TODO: add Errback 
+        if error:
+            try:
+                self.publishError("Error getting the sessionId: {}".format(error))
+            except NexusNotConnectedException:
+                pass # only log if not connected
+            time.sleep(2)
+        BTPostRequest('applicationAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.setSessionId, errBack=self.getSessionId).send() # TODO: add Errback 
 
     def defineCallbacks(self):
         @self.sio.event
@@ -349,7 +355,7 @@ class NexusConnector(object):
         def register(data):
             self.registerData = data
             if data['api']['intent'] == 'requestRegistration':
-                self.getSessionId()
+                self.getSessionId() # TODO: add try! or Add the Errback!
             elif data['api']['intent'] == 'registrationResult':
                 if data['success']:
                     self.isRegistered = True
