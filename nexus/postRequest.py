@@ -8,6 +8,7 @@ import requests
 # 3rd Party imports
 
 # local imports
+from .nexusExceptions import RequestError
 
 # end file header
 __author__      = "Adrian Lubitz"
@@ -44,16 +45,15 @@ class PostRequest(object):
         try:
             r = requests.post(self.url, data=self.data, **kwargs)
             c = r.content
-            r.raise_for_status()
-            # content =json.loads(r.content)            
-            if self.callback: # TODO: move out of try?
-                self.callback(r.json())
+            r.raise_for_status()            
         except Exception as e:
             if self.errBack:
-                self.errBack((e, c))
+                self.errBack(RequestError(self.data, e, c))
             else:
-                print('Error in PostRequest: [{}]{}, {}'.format(type(e), e, c))
-                # raise(e)
+                raise RequestError(self.data, e, c) # This is needed for the non-blocking case without errBack, to make it work with try/except
+            return
+        if self.callback:
+                self.callback(r.json())
 
     def send(self, blocking=False, **kwargs):
         """
@@ -67,6 +67,7 @@ class PostRequest(object):
 
 if __name__ == "__main__":
     import os
+    # TODO: Token and AxonHost is no longer supported use connectHash
     token = os.environ["TOKEN"]
     axon = os.environ["AXON_HOST"]
     print ("URL: {}".format(axon))

@@ -14,7 +14,7 @@ class AudioStreamProtocol(LineReceiver):
 
     def connectionMade(self):
         LineReceiver.connectionMade(self)
-        print('connectionMade')
+        # print('connectionMade')
         self.intent = 'stream'
         message = Message(intent=self.intent)
         message['sessionId'] = self.factory.service.getSessionId()

@@ -41,6 +41,8 @@ class BTPostRequest(PostRequest):
         
         params['api'] = {'version':'5.0', 'intent':intent}
         self.headers = {'content-type': 'application/json', 'blackout-token': accessToken}
+        # print("Headers: {}".format(self.headers))
+        # print("Payload: {}".format(params))
         super(BTPostRequest, self).__init__(url, params, callback, errBack)
 
     def send(self, blocking=False, **kwargs):
