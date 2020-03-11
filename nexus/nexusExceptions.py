@@ -17,3 +17,8 @@ class NoProtocolException(Exception):
     """ There is no protocol for the host"""
     def __init__(self, host):
         super(NoProtocolException, self).__init__("No protocol given for host {}. You must provide http or https as protocol".format(host))
+
+class RequestError(Exception):
+    """ The Request couldnt be handled """
+    def __init__(self, originalParams, exception, content):
+        super(RequestError, self).__init__("Request {} caused {} with {}".format(originalParams, exception, content))

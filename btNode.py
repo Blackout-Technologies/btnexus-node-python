@@ -117,7 +117,7 @@ class Node(object):
                 # NexusInfo Handler
                 nexInfHandler = logging.StreamHandler()
                 nexInfHandler.setLevel(self.NEXUSINFO)
-                formatter = logging.Formatter()#'[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
+                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
                 formatter.format = Node.nexusFormat
                 nexInfHandler.setFormatter(formatter)
                 self.logger.addHandler(nexInfHandler)
@@ -164,7 +164,7 @@ class Node(object):
         """
         self.nexusConnector.subscribe(group, topic, callback, funcName = funcName)
 
-    def publish(self,group, topic, funcName, params):
+    def publish(self,group, topic, funcName, params, raises=True):
         """
         publishes a Message with the payload(funcName and params) to a topic.
 
@@ -176,38 +176,62 @@ class Node(object):
         :type funcName: String
         :param params: The parameters for the callback
         :type params: List or keywordDict
+        :param raises: if set this raises a NexusNotConnectedException if not connected to the Nexus
+        :type raises: boolean
         """
-        self.nexusConnector.publish(group, topic, funcName, params)
+        try:
+            self.nexusConnector.publish(group, topic, funcName, params)
+        except NexusNotConnectedException as e:
+            if raises:
+                raise(e)
 
-    def publishDebug(self, debug):
+    def publishDebug(self, debug, raises=False):
         """
         Publish a Debug message on the btNexus if debug is active
 
         :param debug: A Message to send to the debug topic
         :type debug: String
+        :param raises: if set this raises a NexusNotConnectedException if not connected to the Nexus
+        :type raises: boolean
         """
-        debug = "Class: " + self.__class__.__name__ + " " + debug.__class__.__name__ + ": " + str(debug)
-        self.nexusConnector.publishDebug(debug)
+        try:
+            debug = "[{}]: {}".format(self.nodeName, debug) 
+            self.nexusConnector.publishDebug(debug)
+        except NexusNotConnectedException as e:
+            if raises:
+                raise(e)
 
-    def publishWarning(self, warning):
+    def publishWarning(self, warning, raises=False):
         """
         Publish a Warning message on the btNexus
 
         :param warning: A Message to send to the warning topic
         :type warning: String
+        :param raises: if set this raises a NexusNotConnectedException if not connected to the Nexus
+        :type raises: boolean        
         """
-        warning = "Class: " + self.__class__.__name__ + " " + warning.__class__.__name__ + ": " + str(warning)
-        self.nexusConnector.publishWarning(warning)
+        try:
+            warning = "[{}]: {}".format(self.nodeName, warning) 
+            self.nexusConnector.publishWarning(warning)
+        except NexusNotConnectedException as e:
+            if raises:
+                raise(e)
 
-    def publishError(self, error):
+    def publishError(self, error, raises=False):
         """
         Publish a Error message on the btNexus
 
         :param error: A Message to send to the error topic
         :type error: String
+        :param raises: if set this raises a NexusNotConnectedException if not connected to the Nexus
+        :type raises: boolean        
         """
-        error = "Class: " + self.__class__.__name__ + " " + error.__class__.__name__ + ": " + str(error)
-        self.nexusConnector.publishError(error)
+        try:
+            error = "[{}]: {}".format(self.nodeName, error) 
+            self.nexusConnector.publishError(error)
+        except NexusNotConnectedException as e:
+            if raises:
+                raise(e)
 
     def write(self, error):
         """
@@ -296,4 +320,3 @@ if __name__ == '__main__':
     
     test = Test(packagePath='./tests/packageIntegration.json')
     test.connect()
-    print('I wasnt blocking')

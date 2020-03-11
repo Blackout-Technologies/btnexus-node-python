@@ -13,6 +13,7 @@ from btPostRequest import BTPostRequest
 
 # local imports
 from nexus.protocols.audioStreamFactory import AudioStreamFactory
+from nexus.nexusExceptions import NexusNotConnectedException
 # end file header
 __author__      = 'Adrian Lubitz'
 __copyright__   = 'Copyright (c)2017, Blackout Technologies'
@@ -20,23 +21,21 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 
 class StreamingNode(Node):
 
-    def __init__(self, language=None, personalityId=None, integrationId=None, sessionId=None, **kwargs):
+    def __init__(self, language=None, personalityId=None, sessionId=None, **kwargs):
         super(StreamingNode, self).__init__(**kwargs)
-        self.language = language
-        if self.language == None:
-            self.language = os.environ['LANGUAGE']
-        self.personalityId = personalityId
-        if self.personalityId == None:
-            self.personalityId = os.environ['PERSONALITYID']
-        self.integrationId = integrationId
-        if self.integrationId == None:
-            self.integrationId = os.environ['INTEGRATIONID']
         self.sessionId = sessionId
-        if self.sessionId == None:
-            try:
-                self.sessionId = os.environ['SESSIONID']
-            except:
-                print('SessionId not set - will be set in the _setUp()')
+        self.language = language
+        if not self.language:
+            if 'LANGUAGE' in os.environ:
+                self.language = os.environ['LANGUAGE']
+            else:
+                self.language = self.package['language']
+        self.personalityId = personalityId
+        if not self.personalityId:
+            if 'PERSONALITYID' in os.environ:
+                self.personalityId = os.environ['PERSONALITYID']
+            else:
+                self.personalityId = self.package['personalityId']  
 
     def connect(self, **kwargs):
         """
@@ -56,20 +55,20 @@ class StreamingNode(Node):
         """
         self.transport = None
         params = {
-            'integrationId': self.integrationId,
+            'integrationId': self.config['id'],
             'personalityId': self.personalityId
         }
-        try:
-            print("reusing sessionId: {}".format(self.sessionId))
-        except AttributeError:
+        if self.sessionId:
+            self.logger.log(self.NEXUSINFO, "[{}]: reusing sessionId: {}".format(self.nodeName, self.sessionId))            
+        else:
             try:
-                print("URL: {}".format(self.axonURL))
-                BTPostRequest('sessionAccessRequest', params, accessToken=self.token, url=self.axonURL, callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
+                BTPostRequest('sessionAccessRequest', params, accessToken=self.config['token'], url=self.config['host'], callback=self.setSessionId).send(True) #This is called as a blocking call - if there is never a response coming this might be a problem...
             except Exception as e:
                 try:
                     self.publishError('Unable to get the sessionId: {}'.format(e))
-                except:
-                    print('Unable to get the sessionId: {}'.format(e)) # if not connected just prints
+                except NexusNotConnectedException:
+                    # print('Unable to get the sessionId: {}'.format(e)) # if not connected just prints
+                    pass
                 time.sleep(2) # sleep
                 self._setUp()  # and retry
 
@@ -82,9 +81,11 @@ class StreamingNode(Node):
         # print('response: {}'.format(response))
         if response['success']:
             self.sessionId = response['sessionToken']
-            print('[{}]set sessionId to {}'.format(self.nodeName, self.sessionId))
+            self.logger.log(self.NEXUSINFO, '[{}]set sessionId to {}'.format(self.nodeName, self.sessionId))            
         else:
             pass # TODO: what should I do here? - retry
+            time.sleep(2)
+            self._setUp()
 
     def _onDisconnected(self): 
         """
@@ -94,7 +95,7 @@ class StreamingNode(Node):
         if self.transport:
             self.transport.loseConnection()
             # self.transport.connectionLost(reason=None) - this is a callback not a function to call - apperently some say it should be called
-            print('Killing the Streaming')
+            self.logger.log(self.NEXUSINFO, '[{}] Killing the Streaming'.format(self.nodeName))            
         if self.disconnecting: # Disconnect was initialized by myself
             from twisted.internet import reactor
             reactor.stop()
@@ -124,13 +125,13 @@ class StreamingNode(Node):
         if not self.transport:
             self.host = host
             self.port = int(port)
-            print('Want to connect to {}:{}'.format(host, port))
+            self.logger.log(self.NEXUSINFO, "[{}]: Want to connect to {}:{}".format(self.nodeName, host, port))
             factory = AudioStreamFactory(self)
             from twisted.internet import reactor
             reactor.callFromThread(reactor.connectSSL, self.host, self.port, factory, ssl.ClientContextFactory())
-            print('Starting the AudioStreamer on {}:{}'.format(self.host, self.port))
+            self.logger.log(self.NEXUSINFO, "[{}]: Starting the AudioStreamer on {}:{}".format(self.nodeName, self.host, self.port))
         else:
-            print('Im already connected  - just ignoring this.')
+            self.logger.log(self.NEXUSINFO,'[{}] Im already connected  - just ignoring this.'.format(self.nodeName))
 
     def _startStreaming(self, transport):
         self.transport = transport
@@ -165,11 +166,11 @@ class StreamingNode(Node):
         """
         if not self.ready:
             Timer(3, self.handshake).start()
-            print('Handshake not performed yet - retry')
+            self.logger.log(self.NEXUSINFO, "[{}]: Handshake not performed yet - retry".format(self.nodeName))            
             try:
                 self.publish(group=self.personalityId, topic='speechToText', funcName='initStream', params=[self.sessionId, self.language])
             except Exception as e:
-                print(e)
+                self.logger.error(str(e))
 
 if __name__ == '__main__':
     asn = StreamingNode(packagePath='./tests/packageIntegration.json', rcPath='../streaming-axon/speechIntegration/.btnexusrc')

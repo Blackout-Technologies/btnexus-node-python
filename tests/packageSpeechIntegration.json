@@ -1,0 +1,20 @@
+{
+    "name": "test",
+    "title": "Test",
+    "description": "This is just a test",
+    "type": "integration",
+    "language": "en-US",
+    "personalityId": "18b50f0b-d966-6e5a-1fa1-b3a31e4fc428",
+    "keywords": [
+        "test",
+        "testing"
+    ],
+    "version": "0.2.3",
+    "nexusVersion": "2.2",
+    "license": "See attached LICENSE file",
+    "author": {
+        "name": "Adrian Lubitz",
+        "url": "https://blackout.ai/",
+        "email": "al@blackout.ai"
+    }
+ }

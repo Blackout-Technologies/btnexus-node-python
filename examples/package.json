@@ -2,7 +2,7 @@
     "name": "my-cool-hook",
     "title": "My Cool Hook with a new description",
     "description": "this is the best hook ever",
-    "type": "hook",
+    "type": "integration",
     "keywords": [
         "ai",
         "test",
@@ -16,7 +16,9 @@
     "license": "See attached LICENSE file",
     "scripts": {
         "compress": "node ./node_modules/btnexus-hook/lib/compressForDelivery.js",
-        "upload": "node ./node_modules/btnexus-hook/lib/dispatchDelivery.js"
+        "upload": "node ./node_modules/btnexus-hook/lib/dispatchDelivery.js",
+        "build": "pip install -r requirements.txt",
+        "start": "python glossary.py"
     },
     "author": {
         "name": "Marc Fiedler",
