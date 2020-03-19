@@ -1,6 +1,7 @@
 '''Tests for the Hook'''
 # System imports
 import unittest
+import time
 
 # 3rd Party imports
 from btHook import Hook
@@ -27,6 +28,7 @@ class TestHook(unittest.TestCase):
 
     def tearDown(self):
         self.shakyInternet.stop()
+        time.sleep(2)
 
     def test_init(self):
         '''
