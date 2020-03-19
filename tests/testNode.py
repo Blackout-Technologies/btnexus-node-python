@@ -57,6 +57,20 @@ class Pong(Node):
         # print('sending pong')
         self.publish(group='test', topic='test', funcName='pong', params={})
 
+class ReconnectingNode(Node):
+    """
+    This Nodes tests the reconnect() method
+    """
+    def __init__(self, **kwargs):
+        super(ReconnectingNode, self).__init__(**kwargs)
+        self.reconnects = 0
+    def onConnected(self):
+        """ reconnect 5 times and then disconnect """
+        if self.reconnects < 5:
+            self.reconnect()
+            self.reconnects += 1
+        else:
+            self.disconnect()
 
 class NodeTests(unittest.TestCase):
     '''Tests for the Node''' 
@@ -88,6 +102,10 @@ class NodeTests(unittest.TestCase):
             print('Ping/Pong {} done'.format(x))
         pong.disconnect()
 
+    def test_reconnect(self):
+        print('TESTING THE RECONNECTNODE')
+        node = ReconnectingNode(packagePath='packageIntegration.json')
+        node.connect()
     
 
 if __name__ == "__main__":

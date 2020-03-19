@@ -275,6 +275,9 @@ class Node(object):
     def _setUp(self):
         """This is used in classes that are base classes. It enables you to support the callback in a clean way without calling super. Therefore you need to call super here."""
         self.setUp()
+    
+    def isConnected(self):
+        return self.nexusConnector.isConnected
 
     # Can be handled by onDisconnected
     # def cleanUp(self):
@@ -304,6 +307,9 @@ class Node(object):
         """
         self.disconnecting = True
         self.nexusConnector.disconnect()
+
+    def reconnect(self, **kwargs):
+        self.nexusConnector.reconnect(**kwargs)
 
     def run(self):
         """
