@@ -47,6 +47,7 @@ setup(name='btnexus-node-python',
           'certifi',
           'backports.ssl_match_hostname',
           'requests',
+          'python-engineio==3.11.2'
           'python-socketio==4.4.0', 
           'Twisted',
           'pyOpenSSL', 
