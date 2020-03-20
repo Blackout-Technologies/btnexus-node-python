@@ -191,7 +191,10 @@ class StreamingNode(Node):
         This just eats all the bytes from the stream if it is not seekable.
         """
         while(not self.ready):
-            self.datStream.read(64)
+            try:
+                self.datStream.read(64) # that maybe not there if someone calls disconnectService before stream
+            except: # if not possible do nothing 
+                pass
 
     def reconnectService(self):
         """
