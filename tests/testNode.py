@@ -4,6 +4,8 @@ import unittest
 import time
 from threading import Thread, Timer
 import os
+import logging
+
 
 # 3rd Party imports
 from btNode import Node
@@ -14,6 +16,16 @@ from reconnectUtils import ShakyInternet
 # end file header
 __author__      = 'Adrian Lubitz'
 __copyright__   = 'Copyright (c)2017, Blackout Technologies'
+
+moduleName = 'TESTS'
+logger = logging.getLogger(moduleName)
+logger.setLevel(Node.NEXUSINFO)
+# create file handler which logs even debug messages
+fh = logging.StreamHandler()
+fh.setLevel(Node.NEXUSINFO)
+formatter = logging.Formatter('%(asctime)s - [%(levelname)s]: %(message)s') 
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 class TestNode(Node):
@@ -57,6 +69,20 @@ class Pong(Node):
         # print('sending pong')
         self.publish(group='test', topic='test', funcName='pong', params={})
 
+class ReconnectingNode(Node):
+    """
+    This Nodes tests the reconnect() method
+    """
+    def __init__(self, **kwargs):
+        super(ReconnectingNode, self).__init__(**kwargs)
+        self.reconnects = 0
+    def onConnected(self):
+        """ reconnect 5 times and then disconnect """
+        if self.reconnects < 5:
+            self.reconnect()
+            self.reconnects += 1
+        else:
+            self.disconnect()
 
 class NodeTests(unittest.TestCase):
     '''Tests for the Node''' 
@@ -67,6 +93,7 @@ class NodeTests(unittest.TestCase):
 
     def tearDown(self):
         self.shakyInternet.stop()
+        time.sleep(2)
 
     def test_connect(self):
         '''
@@ -74,20 +101,24 @@ class NodeTests(unittest.TestCase):
         '''
         # read token from gitlab variables! and axonURL
         print('TESTING THE NODE')
-        node = TestNode(packagePath='packageIntegration.json')
+        node = TestNode(packagePath='packageIntegration.json', logger=logger)
         node.connect()
 
     # Making a real message_exchange test out of Ping/Pong - it fails if after n seconds not all pongs are collected.
     @timeout_decorator.timeout(600, use_signals=False)
     def test_message_exchange(self):
-        pong = Pong(packagePath='packageIntegration.json')
+        pong = Pong(packagePath='packageIntegration.json', logger=logger)
         pong.connect(blocking=False)
         for x in range(20):
-            ping = Ping(packagePath='packageIntegration.json')
+            ping = Ping(packagePath='packageIntegration.json', logger=logger)
             ping.connect(blocking=not bool(x % 5)) # every 5th Node is blocking
             print('Ping/Pong {} done'.format(x))
         pong.disconnect()
 
+    def test_reconnect(self):
+        print('TESTING THE RECONNECTNODE')
+        node = ReconnectingNode(packagePath='packageIntegration.json', logger=logger)
+        node.connect()
     
 
 if __name__ == "__main__":

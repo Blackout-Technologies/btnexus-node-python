@@ -14,14 +14,14 @@ run_tests3.6:
     - cd tests
     - python -m unittest discover -s .
 
-run_tests2.7:
-  image: blackouttechnologies/py27-build-essential
-  stage: test
-  script:
-    - pip install .
-    - pip install -r testRequirements.txt
-    - cd tests
-    - python -m unittest discover -s .
+# run_tests2.7:
+#   image: blackouttechnologies/py27-build-essential
+#   stage: test
+#   script:
+#     - pip install .
+#     - pip install -r testRequirements.txt
+#     - cd tests
+#     - python -m unittest discover -s .
 
 deploy_staging:
   stage: deploy

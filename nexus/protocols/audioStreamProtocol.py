@@ -29,11 +29,11 @@ class AudioStreamProtocol(LineReceiver):
             if message['success']:
                 self.factory.service._startStreaming(self.transport)                
             else:
-                print('Closing connection because: {}'.format(message['error']))
+                self.factory.service.publishDebug('Closing connection because: {}'.format(message['error']))
         else:
-            print('Intent {} does not match the protocol. Expecting {}'.format(intent, self.intent + '_start'))
+            self.factory.service.publishDebug('Intent {} does not match the protocol. Expecting {}'.format(intent, self.intent + '_start'))
             self.transport.loseConnection()
 
     def connectionLost(self, reason):
-        print('Lost connection')
+        self.factory.service.publishDebug('Lost connection')
         

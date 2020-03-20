@@ -43,7 +43,7 @@ setup(name='btnexus-node-python',
     py_modules=['btNode', 'btHook', 'btPostRequest', 'btStreamingNode'],
     install_requires=[
           'pyyaml',
-          'six',
+          'six>=1.9.0',
           'certifi',
           'backports.ssl_match_hostname',
           'requests',

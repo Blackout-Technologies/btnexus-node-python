@@ -142,9 +142,10 @@ class NexusConnector(object):
 
     def listen(self, blocking = True, **kwargs): 
         """Start listening on Websocket communication"""
+        self.listenKwargs = kwargs
         # SSLOPTS
         ssl_verify = not "DISABLE_SSL_VERIFY" in os.environ
-        self.reconnect = kwargs['reconnection'] if 'reconnection' in kwargs else True
+        self.reconnection = kwargs['reconnection'] if 'reconnection' in kwargs else True
         self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger, **kwargs)
         self.defineCallbacks()
         self.sio.connect(self.axon)
@@ -157,6 +158,12 @@ class NexusConnector(object):
         """
         self.onDisconnected()
         self.sio.disconnect()
+
+    def reconnect(self, **kwargs):
+        self.disconnect()
+        for arg in kwargs:
+            self.listenKwargs[arg] = kwargs[arg] # overwrite kwargs given as parameter - otherwise take the ones from the connect
+        self.listen(blocking=False, **self.listenKwargs) # a reconnect should never be blocking
 
     def join(self, group):
         """
@@ -305,7 +312,7 @@ class NexusConnector(object):
         self.isRegistered = False
         self.logger.log(self.parent.NEXUSINFO, "Connection closed")
         self.parent._onDisconnected()
-        if self.reconnect:
+        if self.reconnection:
             if not self.parent.disconnecting:
                 self.parent._setUp()
 
