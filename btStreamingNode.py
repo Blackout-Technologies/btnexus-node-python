@@ -86,9 +86,9 @@ class StreamingNode(Node):
             pass # TODO: what should I do here? - retry
             time.sleep(2)
             self._setUp()
-    def disconnectFromService(self):
+    def _disconnectFromService(self):
         """
-        clean up the connection to the Service
+        helperfunction to clean up the connection to the Service
         """
         self.ready = False  # ready when the handshake is done
         if self.transport:
@@ -99,6 +99,13 @@ class StreamingNode(Node):
         if self.disconnecting: # Disconnect was initialized by myself
             from twisted.internet import reactor
             reactor.stop()
+
+    def disconnectFromService(self):
+        """
+        clean up the connection to the Service
+        """
+        from twisted.internet import reactor
+        reactor.callFromThread(self._disconnectFromService)
 
     def _onDisconnected(self): 
         """
