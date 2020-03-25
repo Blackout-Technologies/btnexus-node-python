@@ -5,6 +5,8 @@ import time
 from threading import Thread, Timer
 import os
 import logging
+import inspect
+
 
 
 # 3rd Party imports
@@ -88,36 +90,48 @@ class NodeTests(unittest.TestCase):
     '''Tests for the Node''' 
     shakyInternet = ShakyInternet()
 
+
     def setUp(self):
         self.shakyInternet.start()
+        #if file exists use it otherwise use envVar from CI/CD as file and if nothing raise exception
+        local_rc = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc_integration')
+        if os.path.isfile(local_rc):
+            print("using local btnexusrc file")
+            self.rc_path = local_rc
+        elif "INTEGRATIONRC" in os.environ:
+            print("using env var INTEGRATIONRC")
+            self.rc_path = os.environ['INTEGRATIONRC']
+        else:
+            raise Exception("No valid btnexusrc")
 
     def tearDown(self):
         self.shakyInternet.stop()
         time.sleep(2)
-
+    
+    @timeout_decorator.timeout(120, use_signals=False)
     def test_connect(self):
         '''
         Test the connect process of the Node
         '''
         # read token from gitlab variables! and axonURL
         print('TESTING THE NODE')
-        node = TestNode(packagePath='packageIntegration.json', logger=logger)
+        node = TestNode(packagePath='packageIntegration.json', rcPath=self.rc_path, logger=logger)
         node.connect()
 
     # Making a real message_exchange test out of Ping/Pong - it fails if after n seconds not all pongs are collected.
     @timeout_decorator.timeout(600, use_signals=False)
     def test_message_exchange(self):
-        pong = Pong(packagePath='packageIntegration.json', logger=logger)
+        pong = Pong(packagePath='packageIntegration.json', rcPath=self.rc_path, logger=logger)
         pong.connect(blocking=False)
         for x in range(20):
-            ping = Ping(packagePath='packageIntegration.json', logger=logger)
+            ping = Ping(packagePath='packageIntegration.json', rcPath=self.rc_path, logger=logger)
             ping.connect(blocking=not bool(x % 5)) # every 5th Node is blocking
             print('Ping/Pong {} done'.format(x))
         pong.disconnect()
 
     def test_reconnect(self):
         print('TESTING THE RECONNECTNODE')
-        node = ReconnectingNode(packagePath='packageIntegration.json', logger=logger)
+        node = ReconnectingNode(packagePath='packageIntegration.json', rcPath=self.rc_path, logger=logger)
         node.connect()
     
 

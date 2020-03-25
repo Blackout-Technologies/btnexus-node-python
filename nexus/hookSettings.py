@@ -10,9 +10,14 @@ class HookSettings(dict):
     """
     A dict, that triggers a callback if update() is called and the content changes
     """
-    def __init__(self, callback):
+    def __init__(self, jsonFilePath, callback):
         self.callback = callback
-        super(HookSettings, self).__init__()
+        with open(jsonFilePath) as jsonFile:
+            data = json.load(jsonFile)
+            settings = {}
+            for setting in data:
+                settings[setting] = setting["default"]
+        super(HookSettings, self).__init__(settings)
     
     def update(self, dict):
         if dict != self:

@@ -17,6 +17,7 @@ from btNode import Node # have it like this so it will still be possible to sepe
 # local imports
 
 from nexus.btCaptions import BTCaptions
+from nexus.hookSettings import HookSettings
 
 
 # end file header
@@ -28,7 +29,7 @@ class Hook(Node):
     """
     Blackout Nexus hook. Base class for all hooks
     """
-    def __init__(self, **kwargs):
+    def __init__(self, settingsPath=None, **kwargs):
         """
         Constructor for the hook.
         extracting all important infos from the connectHash
@@ -37,6 +38,28 @@ class Hook(Node):
         super(Hook, self).__init__(**kwargs)
         captionsPath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'captions.json')
         self.captions = BTCaptions(captionsPath) # TODO: add some docstring to be visibile in the docu
+        if not settingsPath:
+            settingsPath = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'settings.json')
+        with open(settingsPath) as jsonFile:
+            data = json.load(jsonFile)
+            self.defaultSettings = {}
+            for setting in data:
+                self.defaultSettings[setting] = data[setting]["default"]
+
+    def getDefaultSettings(self):
+        """
+        Returns the default settings for the hook from the settings.json file - these can be used for local debugging. 
+        In production hooks the settings will be transmitted in onMessage
+        """
+        return self.defaultSettings
+
+    # def onSettingsUpdated(self):
+    #     """
+    #     Is called when settings are updated/changed from the instance UI
+    #     This needs to be overloaded.
+    #     """
+    #     if self.debug:
+    #         self.logger.warning("Hook is an abstract super class you need to overwrite onSettingsUpdated.")
 
     def getCaption(self, lang, key):
         """
@@ -77,7 +100,7 @@ class Hook(Node):
         """
         Forwards the correct params to onMessage.
         This method is just for internal use.
-        """
+        """            
 
         self.onMessage(originalTxt=kwargs["text"]["original"], 
                         intent=kwargs["intent"], 
@@ -85,9 +108,10 @@ class Hook(Node):
                         entities=kwargs["entities"], 
                         slots=kwargs["slots"], 
                         branchName=kwargs["branch"]["name"], 
-                        peer=kwargs)
+                        peer=kwargs, 
+                        settings=kwargs['settings'] if 'settings' in kwargs else {})
 
-    def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
+    def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer, settings):
         """
         Overload for your custum hook! - it needs to trigger say
 
