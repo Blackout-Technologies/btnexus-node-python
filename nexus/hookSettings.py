@@ -1,5 +1,6 @@
 '''Description of the module'''
 # System imports
+import json
 # 3rd Party imports
 # local imports
 # end file header
@@ -25,10 +26,4 @@ class HookSettings(dict):
             self.callback(self)
 
 if __name__ == '__main__':
-    a = HookSettings(print)
-    print(a)
-    a.update({"a":["b"]})
-    l = ["b"]
-    a.update({"a":l})
-    a.update(a)
-    print(a)
+    pass
