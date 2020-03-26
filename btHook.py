@@ -79,7 +79,7 @@ class Hook(Node):
         """
         self.memory.addEvent(self.memoryData)
         # Join complete
-        self.subscribe(self.config["id"], 'hookChat', self._onMessage, "onMessage") 
+        self.subscribe(self.config["id"], 'hookChat', self._onMessage, "hookRequest") 
 
         self.subscribe(self.config["id"], "state", self.state)
         self.readyState = "ready"
@@ -100,16 +100,17 @@ class Hook(Node):
         """
         Forwards the correct params to onMessage.
         This method is just for internal use.
-        """            
-
-        self.onMessage(originalTxt=kwargs["text"]["original"], 
-                        intent=kwargs["intent"], 
-                        language=kwargs["language"], 
-                        entities=kwargs["entities"], 
-                        slots=kwargs["slots"], 
-                        branchName=kwargs["branch"]["name"], 
-                        peer=kwargs, 
-                        settings=kwargs['settings'] if 'settings' in kwargs else {})
+        """     
+        print('HOOKREQUEST: {}'.format(kwargs)) #TODO: remove       
+        self.onMessage(originalTxt=kwargs["text"] if 'text' in kwargs else None, 
+                        intent=kwargs["intent"] if 'intent' in kwargs else None, 
+                        language=kwargs["language"] if 'language' in kwargs else None, 
+                        entities=kwargs["entities"] if 'entities' in kwargs else None, 
+                        slots=kwargs["slots"] if 'slots' in kwargs else None, 
+                        branchName=kwargs["branch"] if 'branch' in kwargs else None, 
+                        peer=kwargs['sessionId'] if 'sessionId' in kwargs else None, 
+                        settings=kwargs['settings'] if 'settings' in kwargs else None)
+        
 
     def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer, settings):
         """
@@ -131,7 +132,9 @@ class Hook(Node):
         :param branchName: Name of the Branch
         :type branchName: String
         :param peer: param to indentify message origin
-        :type peer: dict
+        :type peer: String
+        :param settings: settings for this hook made in the instance
+        :type settings: dict
         
         """
         self.say(peer, {'answer':"Hook needs to overload onMessage"})  # if not overloaded this is what your hook will say
@@ -145,8 +148,12 @@ class Hook(Node):
         :param peer: the peer object handed from onMessage
         :type peer: Object
         """
-        peer["message"] = message
-        self.publish(peer["personalityId"], 'chat', 'hookResponse', peer)
+        # peer["message"] = message
+        # self.publish(group=self.config['id'], topic=peer, funcName='answer', params= {"Hello": "world"}) #TODO: this is not the way it should be - params should be the whole message with answr, hyperrefs...
+        
+        if type(message) == str:
+            message = {'answer':message}
+        self.publish(group=self.config['id'], topic=peer, funcName='hookResponse', params=message)
 
     def _setUp(self):
         """
