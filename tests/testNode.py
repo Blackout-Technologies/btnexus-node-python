@@ -89,20 +89,20 @@ class ReconnectingNode(Node):
 class NodeTests(unittest.TestCase):
     '''Tests for the Node''' 
     shakyInternet = ShakyInternet()
+    local_rc = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(__file__))), '.btnexusrc_integration')
+    if os.path.isfile(local_rc):
+        print("using local btnexusrc file")
+        rc_path = local_rc
+    elif "INTEGRATIONRC" in os.environ:
+        print("using env var INTEGRATIONRC")
+        rc_path = os.environ['INTEGRATIONRC']
+    else:
+        raise Exception("No valid btnexusrc")
 
 
     def setUp(self):
         self.shakyInternet.start()
-        #if file exists use it otherwise use envVar from CI/CD as file and if nothing raise exception
-        local_rc = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc_integration')
-        if os.path.isfile(local_rc):
-            print("using local btnexusrc file")
-            self.rc_path = local_rc
-        elif "INTEGRATIONRC" in os.environ:
-            print("using env var INTEGRATIONRC")
-            self.rc_path = os.environ['INTEGRATIONRC']
-        else:
-            raise Exception("No valid btnexusrc")
+        
 
     def tearDown(self):
         self.shakyInternet.stop()
