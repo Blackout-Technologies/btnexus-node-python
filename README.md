@@ -29,32 +29,6 @@ pip install btnexus-node-python==[VERSION]
 # API Documentation
 You find an API Documentation our [GitHub Page](https://blackout-technologies.github.io/btnexus-node-python)
 
-# Changelog
-* Since Version 4 the protocol was changed to completely use [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** *(Instance Version 2.2)*
-* Since Version 5, Nodes and all inheriting classes (Hooks, Integrations) use a `CONNECT_HASH` which can be obtained from the Instance and should be given in the file `.btnexusrc` or the environment variable `CONNECT_HASH` *(The latter overwrites the first)*. Additionally a `package.json` file is needed. It should be minimal the following:
-
-    ```json
-    {
-        "name": "test",
-        "title": "Test",
-        "description": "This is just a test",
-        "type": "integration",
-        "keywords": [
-            "test",
-            "testing"
-        ],
-        "version": "0.2.3",
-        "nexusVersion": "2.2",
-        "license": "See attached LICENSE file",
-        "author": {
-            "name": "Adrian Lubitz",
-            "url": "https://blackout.ai/",
-            "email": "al@blackout.ai"
-        }
-    }
-    ```
-
-
 
 # Introduction
 
@@ -177,3 +151,31 @@ To implement your own Node you need to inherit from the Node class,
 implement your callbacks and if you are actively doing something implement your
 Threads, that for example read in sensor data. See the examples to get started ;)
 Keep in mind, that you need to set the `CONNECT_HASH` in your `.btnexusrc` or the environment variable `CONNECT_HASH`. If you are using Anaconda you can integrate those into your virtual environment(https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables).
+
+
+# Changelog
+* Since Version 4 the protocol was changed to completely use [socketIO](https://pypi.org/project/python-socketio/) - Therefore it only works with **Dynamic Davinci** *(Instance Version 2.2)*
+* Since Version 5, Nodes and all inheriting classes (Hooks, Integrations) use a `CONNECT_HASH` which can be obtained from the Instance and should be given in the file `.btnexusrc` or the environment variable `CONNECT_HASH` *(The latter overwrites the first)*. Additionally a `package.json` file is needed. It should be minimal the following:
+
+    ```json
+    {
+        "name": "test",
+        "title": "Test",
+        "description": "This is just a test",
+        "type": "integration",
+        "keywords": [
+            "test",
+            "testing"
+        ],
+        "version": "0.2.3",
+        "nexusVersion": "2.2",
+        "license": "See attached LICENSE file",
+        "author": {
+            "name": "Adrian Lubitz",
+            "url": "https://blackout.ai/",
+            "email": "al@blackout.ai"
+        }
+    }
+    ```
+
+

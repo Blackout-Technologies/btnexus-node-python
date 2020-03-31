@@ -103,5 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-#BT
+# BT
 .btnexusrc*
+
+# npm
+node_modules

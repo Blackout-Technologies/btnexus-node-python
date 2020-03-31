@@ -17,11 +17,14 @@ class CafeHook(Hook):
     """
     Example for a Hook that responds with a cafe for a city
     """
+    def onConnected(self):
+        print('CafeHook is ready.')
 
-    def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer):
+    def onMessage(self, originalTxt, intent, language, entities, slots, branchName, peer, settings):
         """
         respond with a cafe name for a city
         """
+        print("GOT REQUEST")
         cities = []
         text = ""
         for word in originalTxt.split():    # make all word with a captial first letter
@@ -38,7 +41,7 @@ class CafeHook(Hook):
 
         print (cities)
             
-        message = "Ich kann leider nichts passendes finden :/"
+        message = self.getCaption(language, 'notFound')
 
 
         try:
@@ -60,14 +63,15 @@ class CafeHook(Hook):
                 if 'suburb' in cafe['address']:
                     suburb = cafe['address']['suburb']
                 if not i:
-                    message = "Probier doch mal {} in {} {}. ".format(name, city, suburb)
+                    message = self.getCaption(language, 'found').format(name, city, suburb)
                 else:
-                    message += "Oder {} in {} {}. ".format(name, city, suburb)
+                    message += self.getCaption(language, 'foundMore').format(name, city, suburb)
         except Exception:
-            message = "Ich kann leider nichts passendes finden :/"
+            message = self.getCaption(language, 'notFound')
         
         self.say(peer, {'answer':message})
 
 if __name__ == "__main__":
     h = CafeHook()  # setup the .btnexusrc in your project
+    h.connect()
 

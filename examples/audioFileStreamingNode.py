@@ -1,4 +1,7 @@
-'''A Node which accepts audio streams and forwards them to the speech to text service of your choice and publishes the transcript on the transcript topic'''
+'''
+A Node which accepts audio streams and forwards them to the speech to text service of your choice and publishes the transcript on the transcript topic
+This example needs to have the speech to text service up and running for your personality.
+'''
 
 # System imports
 from threading import Timer
