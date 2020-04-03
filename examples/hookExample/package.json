@@ -20,7 +20,7 @@
         "compress": "node ./node_modules/btnexus-node/bin/compress.js",
         "upload": "node ./node_modules/btnexus-node/bin/upload.js",
         "build": "pip install -r requirements.txt",
-        "start": "python cafeHook.py"
+        "start": "python hook.py"
     },
     "author": {
         "name": "Adrian Lubitz",
