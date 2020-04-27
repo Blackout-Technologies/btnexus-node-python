@@ -101,7 +101,6 @@ class Hook(Node):
         Forwards the correct params to onMessage.
         This method is just for internal use.
         """     
-        print('HOOKREQUEST: {}'.format(kwargs)) #TODO: remove       
         self.onMessage(originalTxt=kwargs["text"] if 'text' in kwargs else None, 
                         intent=kwargs["intent"] if 'intent' in kwargs else None, 
                         language=kwargs["language"] if 'language' in kwargs else None, 
