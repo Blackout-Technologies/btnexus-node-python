@@ -1,0 +1,12 @@
+{
+    "en-US": {
+        "found": "Checkout {} in {} {}. ", 
+        "foundMore": "or {} in {} {}",
+        "notFound": "I couldn't find a café for your request."
+    },
+    "de-DE": {
+        "found": "Probier doch mal {} in {} {}. ", 
+        "foundMore": "oder {} in {} {}",
+        "notFound": "Ich konnte leider kein Café für deine Anfrage finden."
+    }
+}

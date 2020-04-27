@@ -1,5 +1,6 @@
 '''Description of the module'''
 # System imports
+import json
 # 3rd Party imports
 # local imports
 # end file header
@@ -10,9 +11,14 @@ class HookSettings(dict):
     """
     A dict, that triggers a callback if update() is called and the content changes
     """
-    def __init__(self, callback):
+    def __init__(self, jsonFilePath, callback):
         self.callback = callback
-        super(HookSettings, self).__init__()
+        with open(jsonFilePath) as jsonFile:
+            data = json.load(jsonFile)
+            settings = {}
+            for setting in data:
+                settings[setting] = setting["default"]
+        super(HookSettings, self).__init__(settings)
     
     def update(self, dict):
         if dict != self:
@@ -20,10 +26,4 @@ class HookSettings(dict):
             self.callback(self)
 
 if __name__ == '__main__':
-    a = HookSettings(print)
-    print(a)
-    a.update({"a":["b"]})
-    l = ["b"]
-    a.update({"a":l})
-    a.update(a)
-    print(a)
+    pass

@@ -107,6 +107,8 @@ class NexusConnector(object):
                 error = NoCallbackFoundException("Callback {} doesn't exist in node {} on topic {} in group {}".format(callbackName, self.parentName, topic, group))
                 self.logger.debug(str(error))
                 return error
+        except IndexError:
+            self.publishError("ProtocolError: One key needs to be in payload field of message. Got {}".format(msg))
         except Exception as e:
             error = NoCallbackFoundException(str(e))
             self.publishError(str(error))

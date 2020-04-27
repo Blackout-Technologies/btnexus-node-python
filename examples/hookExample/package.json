@@ -1,0 +1,33 @@
+{
+    "name": "cafe-hook-test",
+    "title": "A Café finder hook",
+    "description": "Finds cafés using the open street map api",
+    "type": "hook",
+    "keywords": [
+        "ai",
+        "test",
+        "digitalization",
+        "OSM",
+        "cafe",
+        "coffee"
+    ],
+    "version": "0.1.0",
+    "icon": "icon.jpg",
+    "banner": "banner.jpg",
+    "nexusVersion": "2.1.0",
+    "license": "See attached LICENSE file",
+    "scripts": {
+        "compress": "node ./node_modules/btnexus-node/bin/compress.js",
+        "upload": "node ./node_modules/btnexus-node/bin/upload.js",
+        "build": "pip install -r requirements.txt",
+        "start": "python hook.py"
+    },
+    "author": {
+        "name": "Adrian Lubitz",
+        "url": "https://blackout.ai/",
+        "email": "al@blackout.ai"
+    },
+    "dependencies": {
+        "btnexus-hook": "^4.0.0"
+    }
+}

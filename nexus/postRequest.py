@@ -53,7 +53,7 @@ class PostRequest(object):
                 raise RequestError(self.data, e, c) # This is needed for the non-blocking case without errBack, to make it work with try/except
             return
         if self.callback:
-                self.callback(r.json())
+            self.callback(r.json())
 
     def send(self, blocking=False, **kwargs):
         """

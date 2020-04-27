@@ -21,4 +21,7 @@ class NoProtocolException(Exception):
 class RequestError(Exception):
     """ The Request couldnt be handled """
     def __init__(self, originalParams, exception, content):
-        super(RequestError, self).__init__("Request {} caused {} with {}".format(originalParams, exception, content))
+        self.originalParams = originalParams
+        self.exception = exception
+        self.content = content
+        super(RequestError, self).__init__("Request {} caused {} with {}".format(self.originalParams, self.exception, self.content))
