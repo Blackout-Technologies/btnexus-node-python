@@ -38,7 +38,7 @@ release_production:
     - python setup.py sdist
     - twine upload --verbose dist/*
   only:
-    - release/*   
+    - /^release.*/
 
 docu_staging:
   image: blackouttechnologies/py36-build-essential
