@@ -35,7 +35,7 @@ class NexusConnector(object):
     version = "4.0"
     
 
-    def __init__(self, connectCallback, parent,  token,  axonURL, applicationId, applicationType, debug, logger):
+    def __init__(self, connectCallback, parent,  token,  axonURL, applicationId, applicationType, debug, logger, hostId):
         """
         Sets up all configurations.
 
@@ -63,6 +63,7 @@ class NexusConnector(object):
         self.applicationId = applicationId
         self.applicationType = applicationType
         self.rootTopic = "ai.blackout."
+        self.hostId = hostId
 
         if not '://' in self.axon:
             raise NoProtocolException(self.axon)
@@ -150,7 +151,8 @@ class NexusConnector(object):
         self.reconnection = kwargs['reconnection'] if 'reconnection' in kwargs else True
         self.sio = socketio.Client(ssl_verify=ssl_verify, logger=self.logger, **kwargs)
         self.defineCallbacks()
-        self.sio.connect(self.axon)
+        socketioURL = self.axon + '?instance=' + self.hostId
+        self.sio.connect(socketioURL, namespaces=["/{}".format(self.hostId)])
         if blocking:
             self.sio.wait() # This waits until disconnect
 
@@ -177,7 +179,7 @@ class NexusConnector(object):
         if not group in self.callbacks:
             if self.isRegistered:
                 join = Message(intent="join", group=group)
-                self.sio.emit('btnexus-join', join.getJsonContent())
+                self.sio.emit('btnexus-join', join.getJsonContent(), namespace="/{}".format(self.hostId))
                 self.callbacks[group] # Because this is a defaultdict only trying to access the group creates a dafaultdict(dict) for this key
             else:
                 self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't join - not registered!".format(self.parentName))
@@ -191,7 +193,7 @@ class NexusConnector(object):
         """
         if self.isRegistered:
             leave = Message('leave', group=group)
-            self.sio.emit('btnexus-leave', leave.getJsonContent())
+            self.sio.emit('btnexus-leave', leave.getJsonContent(), namespace="/{}".format(self.hostId))
         else:
             self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't leave - not registered!".format(self.parentName))
 
@@ -213,7 +215,7 @@ class NexusConnector(object):
         self.join(group)
         if funcName == None:
             funcName = callback.__name__
-        self.sio.on(self.rootTopic + topic, self.onMessage)
+        self.sio.on(self.rootTopic + topic, self.onMessage, namespace="/{}".format(self.hostId))
         self.callbacks[group][topic][funcName] = callback
 
     def unsubscribe(self, group, topic):
@@ -255,7 +257,7 @@ class NexusConnector(object):
         info["host"] = socket.gethostname()
         info['nodeId'] = self.nodeId
         if self.isConnected and self.isRegistered:
-            self.sio.emit('btnexus-publish', info.getJsonContent())
+            self.sio.emit('btnexus-publish', info.getJsonContent(), namespace="/{}".format(self.hostId))
         else:
             raise NexusNotConnectedException()
 
@@ -328,7 +330,7 @@ class NexusConnector(object):
             msg["ip"] = "127.0.0.1" #socket.gethostbyname(socket.gethostname())
             msg["id"] = self.nodeId
             msg["node"] = {}    #TODO: What should be in this field?
-            self.sio.emit('btnexus-registration', msg.getJsonContent())
+            self.sio.emit('btnexus-registration', msg.getJsonContent(), namespace="/{}".format(self.hostId))
         else:
             try:
                 self.publishError('Error getting sessionId: {}\t - retrying in 2 seconds'.format(response['error']))
@@ -355,12 +357,12 @@ class NexusConnector(object):
         BTPostRequest('applicationAccessRequest', params, accessToken=self.token, url=self.axon, callback=self.setSessionId, errBack=self.getSessionId).send() # TODO: add Errback 
 
     def defineCallbacks(self):
-        @self.sio.event
+        @self.sio.event(namespace="/{}".format(self.hostId))
         def connect():
             self.logger.log(self.parent.NEXUSINFO, 'connection established')
             self.isConnected = True
         
-        @self.sio.on('btnexus-registration')
+        @self.sio.on('btnexus-registration', namespace="/{}".format(self.hostId))
         def register(data):
             self.registerData = data
             if data['api']['intent'] == 'requestRegistration':
@@ -373,20 +375,20 @@ class NexusConnector(object):
                     self.isRegistered = False
                     self.logger.error("[{}]: Failed to register to the axon: {}".format(self.parentName, data["error"]))                
 
-        @self.sio.event
+        @self.sio.event(namespace="/{}".format(self.hostId))
         def connect_error():
             self.logger.log(self.parent.NEXUSINFO, "The connection failed!")
 
-        @self.sio.event
+        @self.sio.event(namespace="/{}".format(self.hostId))
         def disconnect():
             self.onDisconnected()
 
 
-        @self.sio.on('pong')
+        @self.sio.on('pong', namespace="/{}".format(self.hostId))
         def onPong(data):
             self.logger.info('[PONG]{}'.format(data))
         
-        @self.sio.on('ping')
+        @self.sio.on('ping', namespace="/{}".format(self.hostId))
         def onPing(data):
-            self.sio.emit('pong', {})
+            self.sio.emit('pong', {}, namespace="/{}".format(self.hostId))
             self.logger.info('[PING]: {}'.format(data))
