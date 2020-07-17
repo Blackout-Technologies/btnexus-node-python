@@ -125,7 +125,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger)
+        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger, hostId=self.config['hostId'])
 
     def linkModule(self, module,group, topic):
         """
