@@ -177,5 +177,5 @@ Keep in mind, that you need to set the `CONNECT_HASH` in your `.btnexusrc` or th
         }
     }
     ```
-
+* Since Version 6 all Nodes are able to connect to 3.0 Instances 
 
