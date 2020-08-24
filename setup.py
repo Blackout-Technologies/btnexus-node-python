@@ -40,17 +40,14 @@ setup(name='btnexus-node-python',
         "Programming Language :: Python :: 3.7",
     ],
     packages = find_packages(),
-    py_modules=['btNode', 'btHook', 'btPostRequest', 'btStreamingNode'],
+    py_modules=['btNode', 'btHook', 'btPostRequest'],
     install_requires=[
           'pyyaml',
           'six>=1.9.0',
           'certifi',
           'backports.ssl_match_hostname',
           'requests',
-          'python-engineio', #==3.11.2', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
-          'python-socketio', #==4.4.0', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
-          'Twisted',
-          'pyOpenSSL', 
-          'service_identity'
+          'python-engineio==3.11.2', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
+          'python-socketio[client]==4.4.0', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
     ],
 )

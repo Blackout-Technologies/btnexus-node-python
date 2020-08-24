@@ -8,23 +8,26 @@ stages:
 
   ###########   TESTS CAN ONLY WORK IF I HAVE A STABLE NEWEST INSTANCE TO CONNECT TO    ###############
           ###### maybe it is possible to start a local instance as a container(pulling the current version from qa-bcr?) and connect to that?
-# run_tests3.6:
-#   image: blackouttechnologies/py36-build-essential
-#   stage: test
-#   script:
-#     - pip install .
-#     - pip install -r testRequirements.txt
-#     - cd tests
-#     - python -m unittest discover -s .
+##### FOR THE TESTS A HOOKRC VARIABLE MUST EXIST WHICH POINTS TO A .BTNEXUSRC FILE (FILE TYPE VARIABLE)
+##### FOR THE TESTS A INTEGRATIONRC VARIABLE MUST EXIST WHICH POINTS TO A .BTNEXUSRC FILE (FILE TYPE VARIABLE)
+##### Check those values in advance  -  the tokens run out and probably need to be renewed every now and then.
+run_tests3.6:
+  image: blackouttechnologies/py36-build-essential
+  stage: test
+  script:
+    - pip install .
+    - pip install -r testRequirements.txt
+    - cd tests
+    - python -m unittest discover -s .
 
-# run_tests2.7:
-#   image: blackouttechnologies/py27-build-essential
-#   stage: test
-#   script:
-#     - pip install .
-#     - pip install -r testRequirements.txt
-#     - cd tests
-#     - python -m unittest discover -s .
+run_tests2.7:
+  image: blackouttechnologies/py27-build-essential
+  stage: test
+  script:
+    - pip install .
+    - pip install -r testRequirements.txt
+    - cd tests
+    - python -m unittest discover -s .
 
 release_production:
   stage: release
