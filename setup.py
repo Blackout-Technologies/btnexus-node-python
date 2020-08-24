@@ -47,7 +47,7 @@ setup(name='btnexus-node-python',
           'certifi',
           'backports.ssl_match_hostname',
           'requests',
-          'python-engineio', #==3.11.2', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
-          'python-socketio[client]' #==4.4.0', # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
+          'python-engineio'==3.11.2, # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
+          'python-socketio[client]'==4.4.0, # newer version has a bug in 2.7 saying `AttributeError: 'module' object has no attribute 'main_thread'\n threading.current_thread() == threading.main_thread():`
     ],
 )
