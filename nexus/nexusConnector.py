@@ -380,7 +380,9 @@ class NexusConnector(object):
             self.logger.log(self.parent.NEXUSINFO, "The connection failed!")
 
         @self.sio.event(namespace="/{}".format(self.hostId))
-        def disconnect():
+        def disconnect(reason=None):
+            if reason:
+                self.logger.log(self.parent.NEXUSINFO, "Disconnected due to '{}'".format(reason))
             self.onDisconnected()
 
 
