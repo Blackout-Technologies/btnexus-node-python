@@ -36,8 +36,8 @@ release_production:
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - VERSION=$(basename $CI_COMMIT_REF_NAME)
-    - export VERSION=$($VERSION).$CI_PIPELINE_IID
+    - BASEVERSION=$(basename $CI_COMMIT_REF_NAME)
+    - export VERSION=$BASEVERSION.$CI_PIPELINE_IID
     # - echo -n $VERSION > VERSION 
     # - cat VERSION
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
@@ -54,8 +54,8 @@ docu_staging:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - VERSION=$(basename $CI_COMMIT_REF_NAME)
-    - export VERSION=$($VERSION).$CI_PIPELINE_IID
+    - BASEVERSION=$(basename $CI_COMMIT_REF_NAME)
+    - export VERSION=$BASEVERSION.$CI_PIPELINE_IID
     - apt-get update -yq 
     - apt-get install -yq git tree
     - git config --global user.email "al@blackout.ai"
