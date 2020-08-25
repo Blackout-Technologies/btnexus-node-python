@@ -12,10 +12,11 @@ README = ""
 with open(readmePath) as readmeFile:
     README = readmeFile.read()
 
-versionPath = os.path.join(HERE , "VERSION")
-VERSION = ""
-with open(versionPath) as versionFile:
-    VERSION = versionFile.read()
+
+if 'VERSION' in os.environ:
+    VERSION = os.environ['VERSION']
+else:
+    VERSION = 'localDebugBuild'
 
 # VERSION = (HERE / "VERSION").read_text()
 # try:
