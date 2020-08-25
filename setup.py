@@ -16,7 +16,7 @@ with open(readmePath) as readmeFile:
 if 'VERSION' in os.environ:
     VERSION = os.environ['VERSION']
 else:
-        VERSION = 'localDebug'
+    VERSION = 'localDebug'
 
 # VERSION = (HERE / "VERSION").read_text()
 # try:
