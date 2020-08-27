@@ -117,7 +117,7 @@ class Node(object):
                 # NexusInfo Handler
                 nexInfHandler = logging.StreamHandler()
                 nexInfHandler.setLevel(self.NEXUSINFO)
-                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
+                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as 21
                 formatter.format = Node.nexusFormat
                 nexInfHandler.setFormatter(formatter)
                 self.logger.addHandler(nexInfHandler)
