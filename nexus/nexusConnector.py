@@ -35,7 +35,7 @@ class NexusConnector(object):
     version = "4.0"
     
 
-    def __init__(self, connectCallback, parent,  token,  axonURL, applicationId, applicationType, debug, logger, hostId):
+    def __init__(self, connectCallback, parent,  token,  axonURL, applicationId, applicationType, debug, logger, hostId, **kwargs):
         """
         Sets up all configurations.
 

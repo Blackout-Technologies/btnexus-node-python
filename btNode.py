@@ -39,7 +39,7 @@ class Node(object):
             record.levelname = 'NEXUSINFO'   
         return '[{}] {} - {} : {}'.format(record.levelname, record.name, record.created, record.msg)
 
-    def __init__(self, connectHash=None, packagePath=None, rcPath=None, logger=None, debug=None):
+    def __init__(self, connectHash=None, packagePath=None, rcPath=None, logger=None, debug=None, **kwargs):
         """
         Constructor sets up the NexusConnector.
 
@@ -125,7 +125,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger, hostId=self.config['hostId'])
+        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger, hostId=self.config['hostId'], **kwargs)
 
     def linkModule(self, module,group, topic):
         """
