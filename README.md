@@ -7,8 +7,7 @@
 |Author|Adrian Lubitz|
 |Author|Marc Fiedler|
 |Email|dev@blackout.ai|
-|Latest stable version|5.1|
-|Required Instance versions| >= 2.2|
+|Required Instance versions| >= 3.0|
 |Runs on|Python 2.7+ or Python 3.6+|
 |State|`Stable`|
 

@@ -39,7 +39,7 @@ class Node(object):
             record.levelname = 'NEXUSINFO'   
         return '[{}] {} - {} : {}'.format(record.levelname, record.name, record.created, record.msg)
 
-    def __init__(self, connectHash=None, packagePath=None, rcPath=None, logger=None, debug=None):
+    def __init__(self, connectHash=None, packagePath=None, rcPath=None, logger=None, debug=None, **kwargs):
         """
         Constructor sets up the NexusConnector.
 
@@ -117,7 +117,7 @@ class Node(object):
                 # NexusInfo Handler
                 nexInfHandler = logging.StreamHandler()
                 nexInfHandler.setLevel(self.NEXUSINFO)
-                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
+                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as 21
                 formatter.format = Node.nexusFormat
                 nexInfHandler.setFormatter(formatter)
                 self.logger.addHandler(nexInfHandler)
@@ -125,7 +125,7 @@ class Node(object):
         else: 
             self.logger = logger
         
-        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger, hostId=self.config['hostId'])
+        self.nexusConnector = NexusConnector(connectCallback=self._onConnected, parent=self, token=self.config['token'], axonURL=self.config['host'], applicationId=self.config['id'], applicationType=self.package['type'], debug=self.debug, logger=self.logger, hostId=self.config['hostId'], **kwargs)
 
     def linkModule(self, module,group, topic):
         """

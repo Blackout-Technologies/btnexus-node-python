@@ -8,23 +8,26 @@ stages:
 
   ###########   TESTS CAN ONLY WORK IF I HAVE A STABLE NEWEST INSTANCE TO CONNECT TO    ###############
           ###### maybe it is possible to start a local instance as a container(pulling the current version from qa-bcr?) and connect to that?
-# run_tests3.6:
-#   image: blackouttechnologies/py36-build-essential
-#   stage: test
-#   script:
-#     - pip install .
-#     - pip install -r testRequirements.txt
-#     - cd tests
-#     - python -m unittest discover -s .
+##### FOR THE TESTS A HOOKRC VARIABLE MUST EXIST WHICH POINTS TO A .BTNEXUSRC FILE (FILE TYPE VARIABLE)
+##### FOR THE TESTS A INTEGRATIONRC VARIABLE MUST EXIST WHICH POINTS TO A .BTNEXUSRC FILE (FILE TYPE VARIABLE)
+##### Check those values in advance  -  the tokens run out and probably need to be renewed every now and then.
+run_tests3.6:
+  image: blackouttechnologies/py36-build-essential
+  stage: test
+  script:
+    - pip install .
+    - pip install -r testRequirements.txt
+    - cd tests
+    - python -m unittest discover -s .
 
-# run_tests2.7:
-#   image: blackouttechnologies/py27-build-essential
-#   stage: test
-#   script:
-#     - pip install .
-#     - pip install -r testRequirements.txt
-#     - cd tests
-#     - python -m unittest discover -s .
+run_tests2.7:
+  image: blackouttechnologies/py27-build-essential
+  stage: test
+  script:
+    - pip install .
+    - pip install -r testRequirements.txt
+    - cd tests
+    - python -m unittest discover -s .
 
 release_production:
   stage: release
@@ -33,9 +36,10 @@ release_production:
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
     # replace https://blackout-technologies.github.io/btnexus-node-python with https://blackout-technologies.github.io/btnexus-node-python/[VERSION]
-    - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
-    - echo -n $VERSION > VERSION 
-    - cat VERSION
+    - BASEVERSION=$(basename $CI_COMMIT_REF_NAME)
+    - export VERSION=$BASEVERSION.$CI_PIPELINE_IID
+    # - echo -n $VERSION > VERSION 
+    # - cat VERSION
     - sed -i 's/https:\/\/blackout-technologies.github.io\/btnexus-node-python/https:\/\/blackout-technologies.github.io\/btnexus-node-python\/'$VERSION'/g' README.md
     - pip install twine==2.0
     - python setup.py sdist
@@ -50,7 +54,8 @@ docu_staging:
     DOCUREPO: https://$GITUSER:$GITPW@github.com/Blackout-Technologies/Blackout-Technologies.github.io.git
     DOCUFOLDER: Blackout-Technologies.github.io
   script:
-    - export VERSION=$(cat VERSION).$CI_PIPELINE_IID
+    - BASEVERSION=$(basename $CI_COMMIT_REF_NAME)
+    - export VERSION=$BASEVERSION.$CI_PIPELINE_IID
     - apt-get update -yq 
     - apt-get install -yq git tree
     - git config --global user.email "al@blackout.ai"
