@@ -63,8 +63,9 @@ class Node(object):
             else:
                 rcPath = rcPath if rcPath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc')
                 with open(rcPath) as btnexusrc:
-                    self.connectHash = btnexusrc.read()
-
+                    connectHash = btnexusrc.read()
+        
+        self.connectHash = connectHash
         self.config = json.loads(base64.b64decode(self.connectHash))
 
         try:
