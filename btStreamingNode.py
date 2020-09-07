@@ -38,16 +38,17 @@ class StreamingNode(Node):
         :param stream: a stream Object that will be stream to the group/topic/funcName
         :type stream: stream
         """
-        # TODO: new publishing StreamHelperNode - maybe also check if the Helper is still alive
+        # new publishing StreamHelperNode - maybe also check if the Helper is still alive
         if not '{}.{}.{}'.format(group, topic, funcName) in self.streams:
             self.streams['{}.{}.{}'.format(group, topic, funcName)] = StreamingHelperNode(group=group, topic=topic, funcName=funcName, stream=stream, packagePath=self.packagePath, connectHash=self.connectHash, debug=self.debug, logger=self.logger, **kwargs)
             self.streams['{}.{}.{}'.format(group, topic, funcName)].connect(blocking=False, binary=True, **kwargs)    
         else:
-            pass #TODO: kill the old and start the new one
-            print('republishing is not supported by now')
+            self.unpublishStream(group=group, topic=topic, funcName=funcName, **kwargs)
+            self.publishStream(group=group, topic=topic, funcName=funcName, stream=stream, **kwargs)
+            
 
     def unpublishStream(self, group, topic, funcName, **kwargs):
-        #TODO: kill correct StreamHelperNode
+        # kill correct StreamHelperNode
         if '{}.{}.{}'.format(group, topic, funcName) in self.streams:
             # disconnect
             self.streams['{}.{}.{}'.format(group, topic, funcName)].disconnect()
@@ -71,17 +72,18 @@ class StreamingNode(Node):
         """
         if not funcName:
             funcName = callback.__name__
-        #TODO: new subscring StreamHelperNode - maybe also check if the Helper is still alive
+        # new subscring StreamHelperNode - maybe also check if the Helper is still alive
         if not '{}.{}.{}'.format(group, topic, funcName) in self.subscribers:
             self.subscribers['{}.{}.{}'.format(group, topic, funcName)] = StreamingHelperNode(group=group, topic=topic, funcName=funcName, callback=callback, packagePath=self.packagePath, connectHash=self.connectHash, debug=self.debug, logger=self.logger, **kwargs)
             self.subscribers['{}.{}.{}'.format(group, topic, funcName)].connect(blocking=False, binary=True, **kwargs)    
         else:
-            pass #TODO: kill the old and start the new one
-            print('resubscribe is not supported by now')
+            pass # kill the old and start the new one
+            self.unsubscribeStream(group, topic, funcName, **kwargs)
+            self.subscribeStream(group, topic, callback, funcName, **kwargs)
 
     def unsubscribeStream(self, group, topic, funcName, **kwargs):
-        #TODO: kill correct StreamHelperNode
-        if '{}.{}.{}'.format(group, topic, funcName) in self.streams:
+        # kill correct StreamHelperNode
+        if '{}.{}.{}'.format(group, topic, funcName) in self.subscribers:
             # disconnect
             self.subscribers['{}.{}.{}'.format(group, topic, funcName)].disconnect()
             del self.subscribers['{}.{}.{}'.format(group, topic, funcName)]
