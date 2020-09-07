@@ -64,8 +64,9 @@ class Node(object):
                 rcPath = rcPath if rcPath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc')
                 with open(rcPath) as btnexusrc:
                     connectHash = btnexusrc.read()
-
-        self.config = json.loads(base64.b64decode(connectHash))
+        
+        self.connectHash = connectHash
+        self.config = json.loads(base64.b64decode(self.connectHash))
 
         try:
             self.connectHashVersion = self.config['version']
@@ -74,9 +75,9 @@ class Node(object):
 
 
         
-        packagePath = packagePath if packagePath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+        self.packagePath = packagePath if packagePath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
 
-        with open(packagePath) as jsonFile:
+        with open(self.packagePath) as jsonFile:
             self.package = json.load(jsonFile)
 
 

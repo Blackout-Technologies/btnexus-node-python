@@ -21,34 +21,41 @@ __copyright__   = 'Copyright (c)2017, Blackout Technologies'
 class AudioFileStreamingNode(StreamingNode):
 
     def onConnected(self):
-        # `group: personalityId.sessionId`, `topic: speechToText`, `funcName:transcript`.
-        self.subscribe(group='{}.{}'.format(self.personalityId, self.sessionId), topic='speechToText', callback=self.transcript)
-        self.subscribe(group='{}.{}'.format(self.personalityId, self.sessionId), topic='speechToText', callback=self.intermediateTranscript)
+        pass # publish the file to a predefined group/topic/funcName.
+        stream = open('BB.wav', 'rb')  
+        self.publishStream('group', 'topic', 'funcName', stream)
 
-    def transcript(self, transcript):
-        print('[TRANSCRIPT]: {}'.format(transcript))
-        # can't directly disconnect, because the response needs to be send back first.
-        # Timer(5.0, self.onStreamReady).start()
-        Timer(3.0, self.disconnect).start()
+class AudioFileReceivingNode(StreamingNode):
+    def onConnected(self):
+        pass # subscribe to a predefined group/topic/funcName where I publish the file. Subscribe with a callback that writes it on disk.
+        self.fileCopy = open('BBCOPY.wav', 'wb')  
+        self.numberOfChunks = 0
+        self.subscribeStream('group', 'topic', callback=self.writeFile, funcName='funcName')
 
-
-    def intermediateTranscript(self, transcript):
-        print('[INTERMEDIATE]: {}'.format(transcript))
-
-    def onStreamReady(self):
-        '''
-        Here the audio file is opened and the stream is given to self.stream()
-        '''
-        print('starting to send audio')
-        audio = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'BB.wav'), 'rb')  
-        self.stream(audio)
-
-
-
+    def writeFile(self, incomingData):
+        pass
+        self.fileCopy.write(incomingData)
+        self.numberOfChunks += 1
+        
+    def onDisconnected(self):
+        #TODO: unsubscribe
+        self.fileCopy.close()
+        print("Saved {} chunks".format(self.numberOfChunks))
+        
 if __name__ == '__main__':
     # asn = AudioFileStreamingNode(language='en-US', personalityId='18b50f0b-d966-6e5a-1fa1-b3a31e4fc428' , integrationId='randomIntegration' ,sessionId='abc123')
-    asn = AudioFileStreamingNode(sessionId = 'Test', packagePath='../tests/packageSpeechIntegration.json', rcPath='../../streaming-axon/speechIntegration/.btnexusrc')
-    asn.connect()
+    receiver = AudioFileReceivingNode(packagePath='../tests/packageIntegration.json')
+    receiver.connect(blocking=False)
+
+    time.sleep(5) # giving the receiver some time - normally you should implement some protocol which does some handshake to make sure both ends are ready to receive
+
+    
+    sender = AudioFileStreamingNode(packagePath='../tests/packageIntegration.json')
+    sender.connect(blocking=False)
+
+    time.sleep(10) # After 10 seconds stop the receiver assuming this is enough time to receive the whole file - normally you should implement some protocol which indicates when the sender is done if it is a finite stream(In general the streamingNode is designed for infinite raw streams)
+
+    receiver.disconnect()
 
     
     
