@@ -64,8 +64,9 @@ class Node(object):
                 rcPath = rcPath if rcPath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), '.btnexusrc')
                 with open(rcPath) as btnexusrc:
                     connectHash = btnexusrc.read()
-
-        self.config = json.loads(base64.b64decode(connectHash))
+        
+        self.connectHash = connectHash
+        self.config = json.loads(base64.b64decode(self.connectHash))
 
         try:
             self.connectHashVersion = self.config['version']
@@ -74,9 +75,9 @@ class Node(object):
 
 
         
-        packagePath = packagePath if packagePath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
+        self.packagePath = packagePath if packagePath else os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile(self.__class__)))), 'package.json')
 
-        with open(packagePath) as jsonFile:
+        with open(self.packagePath) as jsonFile:
             self.package = json.load(jsonFile)
 
 
@@ -117,7 +118,7 @@ class Node(object):
                 # NexusInfo Handler
                 nexInfHandler = logging.StreamHandler()
                 nexInfHandler.setLevel(self.NEXUSINFO)
-                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as
+                formatter = logging.Formatter('[NEXUS]%(name)s - %(asctime)s : %(message)s') # TODO: maybe also use levelname in a good way so that NEXUSINFO is not shown as 21
                 formatter.format = Node.nexusFormat
                 nexInfHandler.setFormatter(formatter)
                 self.logger.addHandler(nexInfHandler)

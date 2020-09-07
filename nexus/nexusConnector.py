@@ -182,7 +182,7 @@ class NexusConnector(object):
                 self.sio.emit('btnexus-join', join.getJsonContent(), namespace="/{}".format(self.hostId))
                 self.callbacks[group] # Because this is a defaultdict only trying to access the group creates a dafaultdict(dict) for this key
             else:
-                self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't join - not registered!".format(self.parentName))
+                self.logger.debug("[{}]: Couldn't join - not registered!".format(self.parentName))
 
     def leave(self, group):
         """
@@ -195,7 +195,7 @@ class NexusConnector(object):
             leave = Message('leave', group=group)
             self.sio.emit('btnexus-leave', leave.getJsonContent(), namespace="/{}".format(self.hostId))
         else:
-            self.logger.debug(self.parent.NEXUSINFO, "[{}]: Couldn't leave - not registered!".format(self.parentName))
+            self.logger.debug("[{}]: Couldn't leave - not registered!".format(self.parentName))
 
     def subscribe(self, group, topic, callback, funcName = None):
         """
@@ -380,7 +380,9 @@ class NexusConnector(object):
             self.logger.log(self.parent.NEXUSINFO, "The connection failed!")
 
         @self.sio.event(namespace="/{}".format(self.hostId))
-        def disconnect():
+        def disconnect(reason=None):
+            if reason:
+                self.logger.log(self.parent.NEXUSINFO, "Disconnected due to '{}'".format(reason))
             self.onDisconnected()
 
 
