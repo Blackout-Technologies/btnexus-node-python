@@ -18,7 +18,7 @@ class PostRequest(object):
     """
     A post request with a callback for the response
     """
-    def __init__(self, url, data, callback=None, errBack=None):
+    def __init__(self, url, data, callback=None, errBack=None, callbackArgs=None):
         """
         setting up the request.
 
@@ -30,12 +30,15 @@ class PostRequest(object):
         :type callback: function pointer
         :param errBack: callback to handle errors. takes one argument which is the exception
         :type errBack: function pointer
+        :param callbackArgs: list of further args for the callback
+        :type callbackArgs: list
         """
 
         self.url = url
         self.data = json.dumps(data)
         self.callback = callback
         self.errBack = errBack
+        self.callbackArgs = callbackArgs
 
     def _send(self, **kwargs):
         """
@@ -53,7 +56,10 @@ class PostRequest(object):
                 raise RequestError(self.data, e, c) # This is needed for the non-blocking case without errBack, to make it work with try/except
             return
         if self.callback:
-            self.callback(r.json())
+            if self.callbackArgs:
+                self.callback(r.json(), *self.callbackArgs)
+            else:    
+                self.callback(r.json())
 
     def send(self, blocking=False, **kwargs):
         """
