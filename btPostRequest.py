@@ -16,7 +16,7 @@ __copyright__   = "Copyright (c)2017, Blackout Technologies"
 
 class BTPostRequest(PostRequest):
     """A post request following the BTProtocol"""
-    def __init__(self, intent, params, accessToken, url, callback=None, errBack=None):
+    def __init__(self, intent, params, accessToken, url, callback=None, errBack=None, callbackArgs=None):
         """
         setting up the request with the btProtocol.
 
@@ -43,7 +43,7 @@ class BTPostRequest(PostRequest):
         self.headers = {'content-type': 'application/json', 'blackout-token': accessToken}
         # print("Headers: {}".format(self.headers))
         # print("Payload: {}".format(params))
-        super(BTPostRequest, self).__init__(url, params, callback, errBack)
+        super(BTPostRequest, self).__init__(url, params, callback, errBack, callbackArgs=callbackArgs)
 
     def send(self, blocking=False, **kwargs):
         """
